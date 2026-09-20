@@ -1,0 +1,118 @@
+generated: '2026-09-19'
+method: searched
+source: https://api.trustboost.dev/.well-known/x402
+derived_from: openapi/trustboost-dev-openapi.json
+docs:
+- https://api.trustboost.dev/llms.txt
+- https://api.trustboost.dev/pricing
+- https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/PRIVACY.md
+summary: >-
+  TrustBoost's conformance profile is the agent-commerce protocol stack: x402 v2 observed live and definitively
+  (a real HTTP 402 with a base64 PAYMENT-REQUIRED header decoding to a v2 PaymentRequirements object, plus a
+  /.well-known/x402 discovery document), an MCP server at protocol version 2024-11-05 with a non-standard
+  schema key, an A2A card that fails the protocolVersion hard check and an "A2A endpoint" that is not
+  JSON-RPC, an ANP agent-description with a did:web identifier, and CAIP-2 chain identifiers for Base and
+  Solana. It declares no OAuth/OIDC, no RFC 9457 problem details, no RFC 9116 security.txt, no RFC 9727 API
+  catalog and no RFC 8594 sunset signalling. Its privacy-regime statements (GDPR Art. 28 processor role, EU AI
+  Act Art. 12/13/26, LGPD, APPI, CCPA) are self-declarations in a privacy policy that also calls the service a
+  learning prototype with no certified audit; they are recorded as claims, not conformance.
+standards:
+- id: x402
+  name: x402 HTTP payment protocol
+  version: '2'
+  conforms: true
+  verification: observed
+  domain_standard_signature: true
+  evidence: >-
+    GET https://api.trustboost.dev/sanitize returned HTTP 402 with a PAYMENT-REQUIRED header whose base64 body
+    decodes to {"x402Version":2,"resource":{"url":"https://api.trustboost.dev/sanitize",...},"accepts":[{"scheme":"exact","network":"eip155:8453","amount":"10000","payTo":"0xCf1d...37E7","asset":"0x8335...2913"},{"scheme":"exact","network":"solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp","amount":"10000","payTo":"giu4...NWE4","asset":"EPjF...Dt1v"}]}
+    with the same object in the JSON body plus a bazaar extension; GET /.well-known/x402 (and /.well-known/x402.json)
+    serves a v2 discovery document for the 149 USDC bundle (well-known/trustboost-dev-x402.json). The OpenAPI
+    declares 402 on sanitize_pii and a dedicated sanitize_discovery operation "for x402 validators".
+  note: The contract-level signature for agent commerce in this market. Also cross-listed on x402-list.com (200).
+- id: caip-2
+  name: CAIP-2 chain identifiers
+  conforms: true
+  evidence: eip155:8453 (Base) and solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp (Solana mainnet) in the live PaymentRequirements accepts[].network.
+- id: mcp
+  name: Model Context Protocol
+  version: '2024-11-05'
+  conforms: true
+  verification: observed
+  evidence: 'POST https://api.trustboost.dev/mcp initialize returned protocolVersion "2024-11-05", serverInfo {trustboost, 2.6.0}, capabilities {tools: {}}; tools/list returned 1 tool. See mcp/trustboost-dev-mcp.yml.'
+  deviations:
+  - tools/list publishes the schema under input_schema, not the specified inputSchema
+  - GET /mcp returns a 200 JSON manifest rather than an SSE stream (2024-11-05 HTTP+SSE) or a 405/Streamable HTTP response
+- id: json-rpc-2.0
+  conforms: true
+  evidence: '/mcp answers {"jsonrpc":"2.0",...} with standard -32601 for unimplemented methods. /message/send does NOT — it is a FastAPI route requiring body.message (422 on a JSON-RPC envelope).'
+  scope: MCP endpoint only
+- id: a2a
+  name: Agent2Agent protocol
+  version: null
+  conforms: false
+  grade: flavored
+  evidence: >-
+    a2a/trustboost-dev-agent-card.json — capabilities is an object and skills an array of 3, but protocolVersion
+    is absent (hard failure) and the capabilities keys are product flags; POST /message/send rejected a
+    JSON-RPC 2.0 body with 422 "body.message Field required". Graded flavored in a2a/trustboost-dev-a2a.yml.
+  note: The card is served, real and the provider's own; what it is not is A2A-conformant.
+- id: anp-agent-description
+  name: Agent Network Protocol AgentDescription
+  conforms: true
+  verification: observed
+  evidence: 'GET https://api.trustboost.dev/.well-known/agent-description.json 200 — JSON-LD with @context [did/v1, schema.org, agent-network-protocol.com/contexts/agent/v1], @type AgentDescription, id did:web:api.trustboost.dev. Saved at well-known/trustboost-dev-agent-description.json.'
+  note: Presence and shape observed; ANP conformance beyond the document shape was not tested.
+- id: ap2
+  name: Agent Payments Protocol (AP2) v0.1 / A2A x402 extension
+  conforms: null
+  evidence: The agent card's top-level extensions.ap2 block declares supported true, version v0.1, spec https://github.com/google-agentic-commerce/ap2/tree/v0.1 and settlement onchain-usdc via PAYMENT-SIGNATURE. A2A places extension declarations under capabilities.extensions[] with a uri; this is a free-form block, so the declaration is recorded and not graded.
+- id: agent-skills
+  name: Agent Skills (agentskills.io SKILL.md)
+  conforms: true
+  evidence: The provider repo ships SKILL.md with the name/description/license/compatibility/metadata frontmatter and is distributed on ClawHub; saved verbatim at skills/trustboost-dev-pii-sanitizer-SKILL.md.
+- id: llms-txt
+  conforms: true
+  evidence: GET https://api.trustboost.dev/llms.txt 200 (7,766 bytes) and /llms-full.txt 200; both linked from the root page and sitemap.xml.
+- id: content-signal
+  name: Content-Signal robots.txt directive
+  conforms: true
+  evidence: 'robots.txt carries "Content-Signal: search=yes, ai-input=yes, ai-train=no" and per-agent Allow rules for ChatGPT-User, ClaudeBot, Google-Extended, DeepSeekBot, ora-agent with Disallow for CCBot and ByteSpider.'
+- id: openapi-3.0
+  conforms: true
+  version: 3.0.0
+  evidence: openapi/trustboost-dev-openapi.json — openapi "3.0.0", 9 paths, servers[] https://api.trustboost.dev, no components.
+- id: oauth2
+  conforms: false
+  evidence: No securitySchemes in the contract; /.well-known/oauth-authorization-server and /.well-known/oauth-protected-resource both 404. The provider's access model is payment (x402 / tx_hash), not authorization.
+- id: oidc
+  conforms: false
+  evidence: /.well-known/openid-configuration 404.
+- id: rfc9457-problem-details
+  conforms: false
+  evidence: 'Errors are FastAPI {"detail": ...} objects or a custom {"status":"error","code":...,"message":...} envelope; no application/problem+json anywhere. See errors/trustboost-dev-problem-types.yml.'
+- id: rfc9116-security-txt
+  conforms: false
+  evidence: /.well-known/security.txt and /security.txt both 404.
+- id: rfc9727-api-catalog
+  conforms: false
+  evidence: /.well-known/api-catalog and /.well-known/api-catalog.json both 404.
+- id: rfc8594-sunset
+  conforms: false
+  evidence: No Sunset or Deprecation header documented or observed; no deprecated operations in the contract.
+- id: rfc9728-protected-resource-metadata
+  conforms: false
+  evidence: The MCP resource host serves no /.well-known/oauth-protected-resource (404).
+claims:
+  note: >-
+    Self-declared regulatory posture, quoted from the provider's own surfaces. None is a certification and the
+    provider says so: PRIVACY.md §7 "This is a learning prototype, not a certified privacy tool"; SKILL.md
+    "Independent security audit: pending — this project has not been audited by a certified security firm".
+    No trust center, no SOC 2 / ISO 27001 / HIPAA attestation, so no Compliance pointer is emitted.
+  entries:
+  - {regime: GDPR, claim: 'Data Processor under GDPR Article 28; Article 25 privacy by design', source: 'PRIVACY.md and llms-full.txt'}
+  - {regime: EU AI Act (Regulation EU 2024/1689), claim: 'Articles 12, 13, 26 audit-trail support via Proof of Sanitization', source: 'pricing.md, llms.txt, agent card compliance[]'}
+  - {regime: LGPD, claim: 'Article 46', source: llms-full.txt}
+  - {regime: APPI, claim: listed, source: 'agent card compliance[]'}
+  - {regime: CCPA, claim: listed, source: 'agent card compliance[]'}
+  - {regime: HIPAA, claim: 'medical context mode only; "not suitable" for on-premise zero-transmission HIPAA; no BAA without contacting the maintainer', source: 'README.md, PRIVACY.md §7'}

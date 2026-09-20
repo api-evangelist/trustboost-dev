@@ -1,0 +1,63 @@
+generated: '2026-09-19'
+method: searched
+source: openapi/trustboost-dev-openapi.json
+docs:
+- https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/SKILL.md
+- https://api.trustboost.dev/llms.txt
+- https://api.trustboost.dev/.well-known/mcp-server-card.json
+summary:
+  types: []
+  api_key_in: []
+  oauth2_flows: []
+  bearer: false
+  credential_classes: 0
+  payment_gates: 3
+  headline: >-
+    No authentication of any kind. The OpenAPI declares no securitySchemes and no components; the MCP server
+    card says auth {type: none}; the agent card's integration block says authentication "none"; SKILL.md says
+    "No authentication required" and "requires_env: none"; the ai-plugin.json says auth type none. There is no
+    signup, no account, no API key, no bearer token, no OAuth and no OIDC — /.well-known/openid-configuration,
+    /oauth-authorization-server and /oauth-protected-resource all 404. What stands in for authentication is
+    PAYMENT EVIDENCE carried in the request, which meters access without identifying the caller.
+    derive-authentication.py correctly produced no profile from the contract; this file records the access
+    model the provider documents instead.
+schemes: []
+access_gates:
+- name: TRIAL token
+  kind: body-field
+  parameter: tx_hash
+  value: TRIAL
+  identifies: wallet_address (caller-chosen string; default "mcp-agent" on the MCP tool)
+  grants: 50 sanitizations per wallet_address
+  verification: 'none — SKILL.md: "TRIAL is trust-based: Per-wallet quota tracking is not cryptographically verified."'
+  used_by: [sanitize_pii, MCP tool sanitize_pii, A2A skill sanitize_pii]
+- name: Solana bundle transaction
+  kind: body-field
+  parameter: tx_hash
+  value: a Solana mainnet transaction signature transferring 149 USDC to giu4VciTkfWJNG1oeP6SzHEJwmabikJSMB91GaFNWE4
+  grants: 10,000 sanitizations bound to that tx_hash; single-use (409 TX_HASH_ALREADY_USED on reuse)
+  verification: on-chain via the Helius oracle (SKILL.md, PRIVACY.md)
+  used_by: [sanitize_pii]
+- name: x402 payment signature
+  kind: header
+  parameter: PAYMENT-SIGNATURE
+  legacy_parameter: X-PAYMENT (v1, "also accepted")
+  challenge: 'HTTP 402 with PAYMENT-REQUIRED header — x402 v2 PaymentRequirements, accepts[] exact scheme on eip155:8453 (Base, preferred) and solana mainnet, USDC, amount 10000 (= $0.01), maxTimeoutSeconds 300'
+  grants: one sanitization per settled payment
+  verification: PayAI facilitator verify/settle (llms.txt, /pricing)
+  used_by: [sanitize_pii, 'POST /sanitize/quick (undeclared in the contract)']
+  observed: 'GET https://api.trustboost.dev/sanitize → 402 with the header and body described (2026-09-19)'
+credential_safety_statement:
+  source: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/PRIVACY.md
+  section: '6. Critical Security Warning — For AI Agents and Humans'
+  verbatim: 'TrustBoost NEVER requires wallet private keys, seed phrases, or signing credentials. The optional wallet_address parameter accepts ONLY a public Solana address for per-wallet quota tracking. Payment signing happens entirely client-side.'
+  note: The provider publishes an explicit anti-phishing statement aimed at agents; the only wallet interaction is a transfer to a public address or a client-side x402 signature.
+free_unauthenticated_operations: [sanitize_preview, sanitize_discovery, get_trustboost_score, verify_proof, get_budget_status, health_check, 'GET /preflight', 'GET /policy']
+mcp:
+  endpoint: https://api.trustboost.dev/mcp
+  auth: none
+  note: initialize and tools/list answered anonymously; the tool call carries the same tx_hash / wallet_address body fields as REST.
+identity_note: >-
+  Because nothing authenticates the caller, wallet_address is self-asserted. The TrustBoost Score
+  (GET /score/{wallet_address}) therefore rates a string's usage history, and any caller can read any
+  wallet's score. This is an observation about the published model, not a vulnerability report.

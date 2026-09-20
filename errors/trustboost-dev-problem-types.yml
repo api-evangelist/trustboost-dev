@@ -1,0 +1,100 @@
+generated: '2026-09-19'
+method: derived
+source: openapi/trustboost-dev-openapi.json
+probed: true
+docs: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/SKILL.md
+format: custom-json-envelope
+envelope:
+  media_type: application/json
+  shapes:
+  - name: application envelope
+    fields:
+    - {name: status, values: [success, error, not_found]}
+    - {name: code, description: 'Upper-snake machine code on business errors, e.g. QUOTA_EXHAUSTED_OR_PAYMENT_REQUIRED, TX_HASH_ALREADY_USED'}
+    - {name: message, description: Human-readable explanation}
+    - {name: request_id, description: 'Echoes the tx_hash (e.g. "TRIAL") on /sanitize'}
+    - {name: payment_info / trial_info / next_steps, description: 'Present on 402: amount_required, currency, network, payment_address; quota_used/limit/remaining; ordered next actions'}
+    source: SKILL.md "API Response (Error 402)" and "(Error 409)"; observed 404 body on GET /verify/probe
+  - name: framework default
+    fields:
+    - {name: detail, description: 'FastAPI default — a string ("Not Found", "Method Not Allowed") or a validation array of {type, loc, msg, input}'}
+    source: observed on every unknown path (22 bytes) and on POST /message/send without body.message
+  - name: x402 PaymentRequirements
+    fields:
+    - {name: x402Version, value: 2}
+    - {name: resource, description: '{url, description, mimeType}'}
+    - {name: accepts, description: 'array of {scheme, network, amount, maxTimeoutSeconds, payTo, asset, extra}'}
+    - {name: error, value: Payment required}
+    - {name: extensions.bazaar, description: 'input/output examples + JSON Schema for the resource'}
+    - {name: payment_flow, description: 'four-step prose list'}
+    header: PAYMENT-REQUIRED (base64 of the same object)
+    source: observed on GET https://api.trustboost.dev/sanitize
+  observed:
+  - {status: 404, body: '{"detail":"Not Found"}', url: 'https://api.trustboost.dev/.well-known/security.txt', note: 'The generic 404 for every unknown path — never an HTML shell.'}
+  - {status: 404, body: '{"status":"not_found","message":"No sanitization record found for this Solana transaction","anchor_tx":"probe","note":"Only paid sanitizations are anchored on Solana"}', url: 'https://api.trustboost.dev/verify/probe'}
+  - {status: 402, url: 'GET https://api.trustboost.dev/sanitize', note: 'x402 v2 PaymentRequirements in header and body; also observed on GET /redact, /detect and /sanitize/quick.'}
+  - {status: 405, body: '{"detail":"Method Not Allowed"}', url: 'GET https://api.trustboost.dev/message/send and GET /demo'}
+  - {status: 422, body: '{"detail":[{"type":"missing","loc":["body","message"],"msg":"Field required","input":{...}}]}', url: 'POST https://api.trustboost.dev/message/send with a JSON-RPC 2.0 body'}
+  - {status: 200, body: '{"jsonrpc":"2.0","id":2,"error":{"code":-32601,"message":"Method not found: resources/list"}}', url: 'POST https://api.trustboost.dev/mcp', note: 'JSON-RPC errors ride on HTTP 200.'}
+  note: >-
+    Not RFC 9457. No type URI, title, status or instance fields. Three envelope shapes coexist on one host and
+    an agent has to detect which one it received: a business error carries status/code/message, a routing or
+    validation error carries FastAPI's detail, and a payment challenge carries x402Version/accepts.
+problem_types:
+- status: 402
+  title: Payment required / TRIAL quota exhausted
+  code: QUOTA_EXHAUSTED_OR_PAYMENT_REQUIRED
+  occurrences: 2
+  source_operations: [sanitize_pii, sanitize_discovery]
+  causes:
+  - No tx_hash and no PAYMENT-SIGNATURE / X-PAYMENT header on a paid route (x402 challenge).
+  - tx_hash=TRIAL after the wallet_address has used its 50 free sanitizations (SKILL.md envelope with trial_info and payment_info).
+  remediation: >-
+    Decode the PAYMENT-REQUIRED header, sign a USDC transfer authorization for one of accepts[] and retry with
+    PAYMENT-SIGNATURE (X-PAYMENT legacy also accepted); or send 149 USDC on Solana and retry with the
+    resulting tx_hash. Call GET /preflight first — it returns allow/caution/block and the exact price.
+- status: 413
+  title: Text too long — split into chunks
+  occurrences: 1
+  source_operations: [sanitize_pii]
+  causes:
+  - 'text exceeds 10,000 characters (contract: "Max 10,000 chars."); the free preview caps at 500.'
+  remediation: Chunk the input and sanitize each chunk; each chunk consumes one call.
+- status: 409
+  title: Transaction hash already used
+  code: TX_HASH_ALREADY_USED
+  occurrences: 0
+  source_operations: [sanitize_pii]
+  causes:
+  - A Solana bundle tx_hash was submitted a second time; "Each tx_hash can only be used once."
+  remediation: Each payment yields one 10,000-call bundle bound to the tx_hash; reuse is rejected. Not declared in the OpenAPI — documented in SKILL.md only.
+  source: SKILL.md "API Response (Error 409)"
+- status: 404
+  title: No sanitization record for this transaction
+  occurrences: 1
+  source_operations: [verify_proof]
+  causes:
+  - Unknown anchor_tx, or a TRIAL sanitization — "Only paid sanitizations are anchored on Solana."
+  remediation: Verify only the proof_of_sanitization.solana_tx returned by a paid /sanitize response.
+- status: 405
+  title: Method not allowed
+  occurrences: 0
+  source_operations: [a2a_message_send, sanitize_preview (via /demo)]
+  causes:
+  - GET on a POST-only route.
+- status: 422
+  title: Request validation failed
+  occurrences: 0
+  source_operations: [a2a_message_send, sanitize_pii, sanitize_preview]
+  causes:
+  - 'Missing required body field (observed: message on /message/send); FastAPI/pydantic validation.'
+  remediation: Read detail[].loc for the failing field path.
+- status: 200
+  title: MCP JSON-RPC error on HTTP 200
+  occurrences: 0
+  source_operations: [mcp_execute]
+  causes:
+  - '-32601 Method not found for resources/list, prompts/list or any method other than initialize, tools/list, tools/call.'
+  remediation: Inspect result vs error in the JSON-RPC body; the HTTP status does not signal the failure.
+undeclared_in_contract:
+  note: 409 and 422 are documented or observed but absent from the OpenAPI responses; 402 on /redact, /detect and /sanitize/quick is observed on routes the OpenAPI does not declare. See mcp/trustboost-dev-tool-crosswalk.yml undeclared_routes.

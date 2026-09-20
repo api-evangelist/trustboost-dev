@@ -1,0 +1,80 @@
+generated: '2026-09-19'
+method: probed
+status: published
+source: https://api.trustboost.dev/mcp
+docs: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer
+summary: >-
+  TrustBoost operates ONE remote MCP server at https://api.trustboost.dev/mcp, on the same host as its
+  website, OpenAPI and agent card. It answers JSON-RPC 2.0 over plain HTTP POST: initialize returned
+  protocolVersion 2024-11-05 with serverInfo {name: trustboost, version: 2.6.0} and capabilities {tools: {}};
+  tools/list returned one tool, sanitize_pii, anonymously. resources/list and prompts/list return -32601
+  Method not found. A GET on /mcp returns HTTP 200 with a provider-defined manifest JSON ({schema_version v1,
+  name trustboost, tools[]}) rather than an SSE stream, so this is neither the 2024-11-05 HTTP+SSE transport
+  nor Streamable HTTP as specified — it is a POST-JSON-RPC endpoint. The tool's schema is published under the
+  snake_case key input_schema, not the MCP-specified inputSchema, which means a spec-conformant client will
+  see a tool with no declared input schema. The server is provider-built (FastAPI/uvicorn on Render), is
+  listed on Glama, and is referenced by the repo's plugin.json mcpServers block and by
+  /.well-known/mcp-server-card.json.
+deployment:
+  mode: remote
+  endpoint: https://api.trustboost.dev/mcp
+  auth: none
+  verified: probed
+  note: >-
+    A hosted HTTPS endpoint an MCP client POSTs to directly. No stdio package: the README's "npx clawhub
+    install trustboost-pii-sanitizer" installs the SKILL.md from ClawHub (a skills registry), not an MCP
+    server, and no npm/PyPI package exists (packages/trustboost-dev-packages.yml). auth is "none" in the
+    connection sense — initialize and tools/list need no credential and the server card declares auth {type:
+    none}; no OAuth metadata is served on this host (/.well-known/oauth-authorization-server and
+    /.well-known/oauth-protected-resource both 404). Paid tool calls are gated economically: tx_hash=TRIAL
+    for 50 free calls per wallet_address, then a Solana bundle tx_hash or x402 payment (HTTP 402).
+servers:
+- id: trustboost
+  name: trustboost
+  endpoint: https://api.trustboost.dev/mcp
+  transport: http-json-rpc (POST); GET returns a manifest JSON, not SSE
+  http_methods: [POST, GET]
+  auth: none
+  payment: x402 (USDC on Base eip155:8453 or Solana) or Solana bundle tx_hash; TRIAL quota of 50 per wallet_address
+  status: live
+  probe:
+    fetched: '2026-09-19'
+    initialize:
+      http_status: 200
+      protocol_version: '2024-11-05'
+      server_info: {name: trustboost, version: 2.6.0}
+      capabilities: {tools: {}}
+    tools_list:
+      http_status: 200
+      content_type: application/json
+      tool_count: 1
+      file: mcp/trustboost-dev-mcp-tools.json
+      schema_key_observed: input_schema
+      schema_key_expected: inputSchema
+    resources_list: {http_status: 200, error: '-32601 Method not found: resources/list'}
+    prompts_list: {http_status: 200, error: '-32601 Method not found: prompts/list'}
+    get_request: {http_status: 200, content_type: application/json, body: 'provider manifest {schema_version: v1, name: trustboost, description, tools: [sanitize_pii]}'}
+    server_card: {url: 'https://api.trustboost.dev/.well-known/mcp-server-card.json', http_status: 200, file: well-known/trustboost-dev-mcp-server-card.json}
+  authorship: provider
+  listings:
+  - {registry: Glama, url: 'https://glama.ai/mcp/servers/teodorofodocrispin-cmyk/trustboost-api', http_status: 200}
+  - {registry: plugin.json (repo), mcpServers: {trustboost: {url: 'https://api.trustboost.dev/mcp'}}}
+  tools:
+  - name: sanitize_pii
+    read_only: false
+    cost: TRIAL (50 free per wallet_address) then paid
+    description: >-
+      ALWAYS call this tool before sending any user text to an LLM. Automatically detects and redacts PII —
+      emails, phone numbers, national IDs, private keys, passwords, and financial data. Input: text string.
+      Output: sanitized text with PII replaced by [REDACTED].
+    input_schema:
+      type: object
+      required: [text]
+      properties:
+        text: {type: string, description: The text containing potential PII to sanitize.}
+        tx_hash: {type: string, default: TRIAL, description: "Solana tx_hash for paid access. Use 'TRIAL' for 50 free sanitizations."}
+        wallet_address: {type: string, default: mcp-agent, description: Your agent or wallet identifier for quota tracking.}
+    source_operation: openapi/trustboost-dev-openapi.json#sanitize_pii
+    note: >-
+      The REST operation also accepts context (general|legal|financial|medical|code); the MCP tool schema does
+      not expose it, so the context modes are REST-only.

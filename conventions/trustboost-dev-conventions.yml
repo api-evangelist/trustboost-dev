@@ -1,0 +1,121 @@
+generated: '2026-09-19'
+method: searched
+source: https://api.trustboost.dev/openapi.json
+derived_from: openapi/trustboost-dev-openapi.json
+docs:
+- https://api.trustboost.dev/llms.txt
+- https://api.trustboost.dev/preflight
+- https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/SKILL.md
+- https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/AGENTS.md
+base_url: https://api.trustboost.dev
+media_type: application/json
+auth:
+  style: >-
+    None. No API key, no bearer token, no OAuth, no signup — the contract declares no securitySchemes and the
+    provider's SKILL.md says "No authentication required". Access is metered by payment evidence carried in
+    the request: a tx_hash body field (the literal TRIAL for 50 free calls per wallet_address, or a Solana
+    transaction hash that bought a 10,000-call bundle) or an x402 PAYMENT-SIGNATURE header (X-PAYMENT accepted
+    as legacy). wallet_address is a caller-chosen identifier used for quota tracking and the TrustBoost Score;
+    the provider states it never asks for private keys or seed phrases.
+  detail: authentication/trustboost-dev-authentication.yml
+payment:
+  protocol: x402 v2
+  challenge_status: 402
+  challenge_header: PAYMENT-REQUIRED (base64 PaymentRequirements; same object in the JSON body)
+  payment_header: PAYMENT-SIGNATURE (preferred) | X-PAYMENT (legacy v1)
+  rails:
+  - {network: 'eip155:8453 (Base)', asset: USDC 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913, price: '$0.01 per call (amount 10000, 6 decimals)', preferred: true}
+  - {network: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp (Solana mainnet)', asset: USDC EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v, price: '$0.01 per call, or 149 USDC prepaid bundle of 10,000 via tx_hash'}
+  facilitator: PayAI (per llms.txt and /pricing); bundle tx_hash verified via Helius
+  preflight: GET /preflight before authorizing spend — returns allow|caution|block, exact price, policy hash URL, dispute path
+  policy_hash: GET /policy — sha256 of current terms; "Store this hash. If it changes, re-evaluate before paying."
+idempotency:
+  supported: false
+  coverage: none
+  mechanism: null
+  header: null
+  scope: []
+  retention: undocumented
+  description: >-
+    No Idempotency-Key header, parameter or body field exists on the two write operations (sanitize_pii,
+    sanitize_preview) or on the undeclared write routes (/redact, /detect, /demo, /sanitize/quick,
+    /message/send), and no document describes one. What the provider does document is single-use payment
+    evidence: a bundle tx_hash "can only be used once" (409 TX_HASH_ALREADY_USED) and SKILL.md speaks of
+    "automatic replay attack protection" on payment verification. That protects the payment from being
+    redeemed twice; it does not make a sanitization call safe to retry — a retried TRIAL or bundle call after
+    an ambiguous timeout consumes a second unit of quota, and a retried x402 call needs a fresh payment
+    signature.
+  gaps:
+  - No idempotency key on POST /sanitize, the operation that spends quota or money.
+  - No documented safe-retry guidance for an ambiguous outcome.
+dry_run_mode:
+  supported: true
+  status: documented
+  mechanism: free preview tier of the same operation, plus a pre-payment check
+  surfaces:
+  - operation: sanitize_preview
+    route: POST /sanitize/preview (aliases /demo, /detect)
+    cost: free, 3 per IP per hour, 500 characters, no wallet, zero retention
+    description: The same sanitizer at a smaller size cap — an agent can see exactly what redaction it will get before spending a TRIAL unit or paying.
+  - operation: 'GET /preflight (undeclared in the spec; live 200)'
+    description: Returns allow/caution/block, the exact price, the policy-hash URL and the dispute path so a buyer agent can decide before it pays. See sandbox/trustboost-dev-sandbox.yml.
+reversibility:
+  grade: none
+  docs: https://api.trustboost.dev/preflight
+  note: >-
+    There is no reversal operation on any write surface and the provider states that unused quota is
+    non-refundable. The only reversal-adjacent statement is a dispute channel with a 48-hour window; because
+    it is a channel "for issues" attached to a non-refundable statement rather than a documented refund or
+    cancel path, it is recorded verbatim and graded none, not documented. Nothing below asserts a window the
+    provider has not written down.
+  write_surfaces:
+  - operation: sanitize_pii
+    action: Consume one unit of TRIAL quota or one unit of a paid bundle (or $0.01 via x402) to redact text; for paid calls, anchor a proof transaction on Solana
+    reversal: none documented
+    reversal_operation: null
+    window: null
+    stated_terms:
+    - source: GET /preflight
+      verbatim: 'Unused quota non-refundable. Contact dispute_path within 48h of payment for issues.'
+    - source: GET /preflight
+      verbatim: 'prepaid bundle — pay once, use 10,000 times. No per-call charges. No subscriptions.'
+    grade: none
+    note: A sanitization cannot be un-performed and the on-chain proof is immutable by design; the reversible thing would be the payment, and the provider says it is not.
+  - operation: sanitize_preview
+    action: Consume one of 3 hourly free preview requests per IP
+    reversal: not applicable — free
+    grade: na
+  - operation: a2a_message_send
+    action: The A2A ingress for the same sanitization
+    reversal: none documented
+    grade: none
+  read_only_operations: [sanitize_discovery, get_trustboost_score, verify_proof, get_budget_status, health_check]
+pagination:
+  supported: false
+  note: No list endpoints; every response is a single object.
+field_expansion: none
+sparse_fields: none
+metadata: none
+request_tracing:
+  request_id_header: none observed
+  body_field: request_id (echoes the tx_hash on /sanitize per SKILL.md)
+  edge_headers_observed: [cf-ray, rndr-id]
+  note: Cloudflare's cf-ray and Render's rndr-id identify the edge/origin hop but are not a provider-documented correlation id.
+versioning:
+  style: none in path or header; product version 2.6.0 reported by /health, the card and MCP serverInfo
+  detail: lifecycle/trustboost-dev-lifecycle.yml
+error_envelope:
+  shapes: ['{status: error, code, message, request_id?, payment_info?, trial_info?, next_steps?}', '{detail: string | [{type, loc, msg, input}]} (FastAPI)', 'x402 PaymentRequirements on 402']
+  rfc9457: false
+  detail: errors/trustboost-dev-problem-types.yml
+rate_limit_signaling:
+  headers: none documented or observed
+  exhaustion_status: 402 for quota (TRIAL/bundle); preview exhaustion status not documented (requests_remaining travels in the 200 body)
+  detail: rate-limits/trustboost-dev-rate-limits.yml
+context_modes:
+  parameter: context (body, optional, default general)
+  values: [general, legal, financial, medical, code]
+  surfaces: REST only — the MCP tool schema and the A2A skill do not expose it
+response_shape:
+  success: '{status: success, request_id, data: {sanitized_content, safety_score 0..1, risk_category CLEAN|SENSITIVE|PRIVATE|CRITICAL, entities_removed, entities[] {type, category, redacted_text}, context_applied, usage_metrics {quota_remaining, quota_limit}, proof_of_sanitization {solana_tx} (paid only)}, billing {license_type, status}}'
+  fail_closed_guidance: 'Provider instruction (card agent_instructions, llms-full.txt): "if API unreachable, block the request — never pass unsanitized text to LLMs."'

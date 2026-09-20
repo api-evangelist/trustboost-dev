@@ -1,0 +1,99 @@
+generated: '2026-09-19'
+method: probed
+source: https://api.trustboost.dev/.well-known/agent-card.json
+card:
+  file: a2a/trustboost-dev-agent-card.json
+  name: TrustBoost PII Sanitizer
+  url: https://api.trustboost.dev
+  version: 2.6.0
+  skills: 3
+  skill_ids: [sanitize_pii, verify_proof, trustboost_score]
+discovery:
+  path: /.well-known/agent-card.json
+  canonical: true
+  host: api.trustboost.dev
+  note: >-
+    Served from api.trustboost.dev, the only host this provider operates — it is the OpenAPI servers[] host,
+    the MCP host, the "A2A" host and the canonical website (the HTML root declares rel=canonical
+    https://api.trustboost.dev). The apex trustboost.dev and www.trustboost.dev have no DNS A record at all
+    (curl exit 6 on every path), so nothing can be served there. The legacy /.well-known/agent.json returns a
+    real JSON 404 ({"detail":"Not Found"}, 22 bytes, FastAPI's default), and a negative-control path
+    (/.well-known/trustboost-negative-control-7f3a91.json) also 404s, so the 200 on agent-card.json is a served
+    document and not an SPA catch-all. Ownership is not in question: the card's url is
+    https://api.trustboost.dev, its repository is github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer,
+    the OpenAPI on the same host titles itself "TrustBoost PII Sanitizer" with the same MIT license URL, and
+    the root page's JSON-LD names the same author and email.
+x-evidence:
+  fetched: '2026-09-19'
+  url: https://api.trustboost.dev/.well-known/agent-card.json
+  http_status: 200
+  content_type: application/json
+  body_bytes: 6182
+  body_parses_as: JSON object with 4 of the 6 AgentCard identity fields (name, url, version, capabilities, skills; no protocolVersion)
+  server: cloudflare in front of a Render origin (x-render-origin-server uvicorn)
+  legacy_path: {url: 'https://api.trustboost.dev/.well-known/agent.json', http_status: 404}
+  negative_control: {url: 'https://api.trustboost.dev/.well-known/trustboost-negative-control-7f3a91.json', http_status: 404}
+  also_listed_on: https://a2aregistry.org (the harvest source; 1 agent under this operator)
+conformance:
+  spec: A2A 1.0.0
+  grade: flavored
+  protocol_version: null
+  preferred_transport: null
+  hard_checks:
+    capabilities_is_object: true
+    protocolVersion_present: false
+    skills_is_array: true
+  deviations:
+  - no-protocolVersion
+  - no-preferredTransport
+  - capabilities-object-carries-product-flags-not-a2a-capabilities
+  - no-provider-block
+  - schema_version-v1-is-not-an-a2a-field
+  - url-is-the-api-root-not-an-a2a-endpoint
+  - a2a-endpoint-is-not-json-rpc
+  - non-a2a-top-level-keys (tagline, category, subcategory, endpoints, payment, compliance, trust, performance, integration, agent_instructions, open_source, license, repository, demo, extensions)
+  detail:
+  - field: protocolVersion
+    observed: absent
+    note: The one hard failure. Without it a client cannot tell which A2A revision the card targets; the card's own "schema_version":"v1" is not an A2A field.
+  - field: capabilities
+    observed: object of ten booleans (pii_detection, pii_redaction, context_aware_sanitization, proof_of_sanitization_on_chain, privacy_budget_per_agent, m2m_trust_score, mcp_server, multilingual_8_languages, x402_compatible, fail_closed)
+    note: >-
+      Passes the object check, but none of the keys is an A2A capability (streaming, pushNotifications,
+      stateTransitionHistory, extensions). They are product feature flags. An A2A client reading
+      capabilities.streaming will find nothing.
+  - field: skills
+    observed: array of 3, each with id, name, description, tags, examples (on one), inputModes, outputModes
+    note: Genuinely A2A-shaped skill objects; this is the most conformant part of the card.
+  - field: defaultInputModes / defaultOutputModes
+    observed: "['text/plain', 'application/json'] / ['application/json']"
+    note: Present and well-formed.
+  - field: url
+    observed: https://api.trustboost.dev
+    note: >-
+      The API root, not an A2A JSON-RPC endpoint. The provider's README and llms.txt name POST /message/send
+      as the A2A endpoint. Probed 2026-09-19: a JSON-RPC 2.0 body ({"jsonrpc":"2.0","method":"tasks/get",...})
+      returned HTTP 422 {"detail":[{"type":"missing","loc":["body","message"],"msg":"Field required"}]} — a
+      FastAPI handler expecting a top-level "message" field — and GET returned 405. That is a REST route named
+      after the A2A method, not an A2A JSONRPC transport, so the README's "A2A ✅ Conformant" claim does not
+      hold against the A2A 0.3.0/1.0.0 shape.
+  - field: extensions
+    observed: top-level object naming ap2 (v0.1, x402 settlement on Base/Solana), bedrock_agentcore and apify_complement
+    note: >-
+      A2A puts extensions under capabilities.extensions[] as {uri, required, description}. Here they are a
+      free-form top-level object; the ap2 entry does point at the real AP2 v0.1 repository, which is the card's
+      agent-commerce signal — see conformance/trustboost-dev-conformance.yml.
+  - field: payment
+    observed: prepaid model, protocols [solana-usdc, x402], tiers {trial 50/wallet free, paid 149 USDC per 10,000, preview 3/ip/hour}, nanopayments 0.0149 USDC per call
+    note: >-
+      Non-standard but substantive. Note the per-call price here (0.0149) differs from the live /pricing
+      document (0.01 USDC per call via /sanitize/quick) — recorded in plans/trustboost-dev-plans-pricing.yml.
+surface_relationship:
+  note: >-
+    One host, three agent doors onto one function. A2A: the card advertises three skills, of which only
+    sanitize_pii has a working write path (POST /message/send, non-JSON-RPC); verify_proof and
+    trustboost_score correspond to GET /verify/{anchor_tx} and GET /score/{wallet_address} in the REST
+    contract. MCP: one tool, sanitize_pii, at https://api.trustboost.dev/mcp. REST: 9 operations. All three
+    settle through the same x402 / tx_hash gate. The sibling ANP document at
+    /.well-known/agent-description.json (did:web:api.trustboost.dev) describes the same agent in the
+    Agent Network Protocol vocabulary and is saved under well-known/. See mcp/trustboost-dev-tool-crosswalk.yml.

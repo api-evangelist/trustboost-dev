@@ -1,0 +1,131 @@
+generated: '2026-09-19'
+method: searched
+probe: true
+source: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/PRIVACY.md
+summary: >-
+  Harvested only. TrustBoost's regulatory surface is one document — PRIVACY.md v4.0 in the GitHub repository
+  (effective May 17, 2026, "Last updated: May 22, 2026"), which /policy names as terms_url — plus the machine
+  endpoints /preflight and /policy and the robots.txt Content-Signal. Four signals carry substance: a named,
+  located sub-processor table; a data-subject request channel with a stated 30-day response; a stated
+  processing and storage location (Render, AWS us-east-1); and an AI-processing disclosure that says raw text
+  is sent to OpenAI GPT-4o-mini. Nothing else on the list is published, and every conventional path probed on
+  the host 404s. The policy contradicts itself on retention (§5 "retained indefinitely" versus the later
+  processing table "90 days"), and that contradiction is recorded rather than resolved.
+signals:
+  subprocessors:
+    url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/PRIVACY.md
+    section: "'4. Third-party services' and 'Sub-processors'"
+    dated: '2026-05-22'
+    entries:
+    - {vendor: OpenAI (GPT-4o-mini), purpose: PII detection engine, location: United States}
+    - {vendor: Supabase, purpose: Audit log storage, location: United States}
+    - {vendor: Render (AWS), purpose: API hosting, location: United States (us-east-1)}
+    - {vendor: Helius, purpose: Solana transaction oracle, location: Distributed}
+    evidence:
+    - source: https://raw.githubusercontent.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/main/PRIVACY.md
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: 'Sub-processors table: "OpenAI (GPT-4o-mini) | PII detection engine | United States", "Supabase | Audit log storage | United States", "Render (AWS) | API hosting | United States (us-east-1)", "Helius | Solana transaction oracle | Distributed"'
+    note: >-
+      A named table with purpose and location for each vendor, in a dated document. It lives in the repository
+      rather than on the host (/legal/subprocessors 404), and each vendor's own privacy policy is linked in §4.
+      The x402 pay-per-call rail additionally names the PayAI facilitator (llms.txt, /pricing) which is NOT in
+      the table.
+  data_subject_request:
+    url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/PRIVACY.md
+    section: "'8. Contact' and 'Data Subject Rights'"
+    channel: teodorofodocrispin@gmail.com
+    stated_sla: 'Response time: 30 days (GDPR Art. 12)'
+    rights_named: [deletion, access (implied by "Data Subject Rights" heading; only deletion is named as a request type)]
+    evidence:
+    - source: https://raw.githubusercontent.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/main/PRIVACY.md
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: '"For questions or to request data deletion, write to: teodorofodocrispin@gmail.com" ... "Data Subject Rights — Contact: teodorofodocrispin@gmail.com — Response time: 30 days (GDPR Art. 12)"'
+    - source: https://api.trustboost.dev/preflight
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: '"dispute_path":"teodorofodocrispin@gmail.com" ... "data_handling":{"raw_input_stored":false,"sanitized_output_retained_days":90,"pii_logged":false}'
+    note: A documented channel and response period. It is a personal Gmail address, not an intake form or API (/privacy/requests 404), and the policy says raw input is never stored, so the deletable record is the sanitized-output audit row.
+  data_residency:
+    url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/PRIVACY.md
+    section: 'Processing Details'
+    regions: [us]
+    selectable: false
+    evidence:
+    - source: https://raw.githubusercontent.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/main/PRIVACY.md
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: '"Location | Render (AWS us-east-1, United States)"'
+    note: >-
+      A single stated processing location, not a residency option. /preflight says "jurisdiction":"US/EU/LATAM",
+      which is a market statement rather than a storage location and is not used here. /docs/data-residency 404.
+  ai_transparency:
+    url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/PRIVACY.md
+    section: "'2. What happens to your data' and README 'Trust Model'"
+    evidence:
+    - source: https://raw.githubusercontent.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/main/PRIVACY.md
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: '"Your text is sent to OpenAI GPT-4o-mini for PII redaction"'
+    - source: https://raw.githubusercontent.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/main/README.md
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: '"Full disclosure on data transmission: raw text is sent to Render (AWS) infrastructure and, for semantic detection, to OpenAI (GPT-4o-mini) — it is not processed locally."'
+    - source: https://raw.githubusercontent.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/main/SKILL.md
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: '"Known Limitations — Prompt injection risk: Malicious text containing instructions like ''Ignore previous instructions'' could potentially bypass PII redaction." ... "Evaluation scores are AI-generated, not from a certified security firm."'
+    - source: https://api.trustboost.dev/robots.txt
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: 'Content-Signal: search=yes, ai-input=yes, ai-train=no'
+    note: >-
+      The substance of an AI-processing transparency statement: which model processes user data, where, that
+      it is not local, the known failure mode, and that the published evaluation scores are themselves
+      AI-generated. Carried in the repository documents, not on a dedicated page (/ai/transparency 404). The
+      Content-Signal directive is the provider's own statement about how ITS content may be used by AI, the
+      inverse direction, recorded here for completeness.
+probed_absent:
+- signal: sbom
+  urls: [{url: 'https://api.trustboost.dev/security/sbom', status: 404}]
+  note: No bill of materials published. Never derived — search only. The repository contains no application source code (a FastAPI service deployed from elsewhere), so there is nothing to build one from either.
+- signal: support_lifetime
+  urls: [{url: 'https://api.trustboost.dev/changelog', status: 404}]
+  note: No versioning or support-period statement anywhere found. See lifecycle/trustboost-dev-lifecycle.yml.
+- signal: accessibility_conformance
+  urls: [{url: 'https://api.trustboost.dev/accessibility', status: 404}]
+  note: An API with a one-page HTML root; no VPAT or WCAG statement.
+- signal: training_data_summary
+  urls: []
+  note: The provider does not train a model; it calls OpenAI's. The statement that raw text is not stored is a retention statement, not a training-data summary, and is not counted here.
+- signal: global_privacy_control
+  urls: []
+  note: No GPC statement in PRIVACY.md. Not tested by header — a header probe would test one request, not a commitment.
+- signal: incident_notification
+  urls: []
+  note: No breach-notification commitment or SLA anywhere in PRIVACY.md or the repository.
+- signal: age_assurance
+  urls: []
+- signal: notice_and_action
+  urls: []
+  note: PRIVACY.md §6 gives a channel (GitHub issues, email) for reporting scams impersonating TrustBoost — a security-report path, not a content notice-and-action process.
+- signal: transparency_report
+  urls: [{url: 'https://api.trustboost.dev/transparency', status: 404}]
+- signal: exit_assistance
+  urls: []
+  note: No export or migration commitment; /preflight states unused quota is non-refundable.
+contradictions_recorded:
+- topic: retention
+  statements:
+  - {source: 'PRIVACY.md §5 Data retention', verbatim: 'Audit log entries (sanitized output + metadata): retained indefinitely for compliance traceability'}
+  - {source: 'PRIVACY.md Processing Details table', verbatim: 'Retention | 90 days for audit metadata. Deleted on request.'}
+  - {source: 'pricing.md', verbatim: 'Audit trail in Supabase (90-day retention)'}
+  - {source: 'GET /preflight', verbatim: '"sanitized_output_retained_days":90'}
+  note: Three surfaces say 90 days and the policy's own retention section says indefinitely. Recorded verbatim; not resolved here.
+- topic: compliance scope
+  statements:
+  - {source: 'SKILL.md metadata.compliance', verbatim: 'GDPR, LGPD, APPI, CCPA, DPDPA'}
+  - {source: 'agent card compliance[]', verbatim: 'GDPR, LGPD, APPI, CCPA, EU-AI-Act-2026'}
+  - {source: 'PRIVACY.md Compliance Statement', verbatim: 'SOC 2: Pending — prototype stage'}
+  note: DPDPA appears only in SKILL.md; SOC 2 is explicitly not held. No Compliance pointer is emitted.

@@ -1,0 +1,67 @@
+generated: '2026-09-19'
+method: probed
+source: https://api.trustboost.dev/pricing
+docs:
+- https://api.trustboost.dev/pricing.md
+- https://api.trustboost.dev/preflight
+- https://api.trustboost.dev/.well-known/agent-card.json
+plan_count: 4
+currency: USDC
+model: 'pay-per-call + prepaid bundle via x402 — "designed for autonomous agents, not human-owned dashboards"; no subscription, no seat pricing, no account'
+summary: >-
+  Four access tiers read from the machine-readable GET /pricing (JSON, 200) and cross-checked against
+  pricing.md, /preflight and the agent card. Two free tiers (a wallet-free preview and a 50-call TRIAL per
+  wallet), a $0.01 USDC pay-per-call rail via x402 on Base (preferred) or Solana, and a 149 USDC prepaid bundle
+  of 10,000 calls on Solana (about $0.0149 per call) that is the only tier producing an on-chain Proof of
+  Sanitization. The surfaces disagree on the per-call price: /pricing and llms.txt say $0.01 via
+  /sanitize/quick; the agent card's nanopayments block says 0.0149 USDC per call; pricing.md and /preflight
+  describe only the bundle (0.0149 per call) and do not mention pay-per-call at all. The live x402 challenge
+  observed on GET /sanitize asks amount "10000" in 6-decimal USDC, i.e. $0.01, so the JSON pricing document
+  matches the wire.
+plans:
+- id: preview
+  name: Preview
+  price: 0
+  currency: USDC
+  period: none
+  included: 3 requests per IP per hour
+  limits: ['500 characters per request', 'no wallet required', 'POST /sanitize/preview (aliases /demo, /detect)']
+  proof: none
+- id: trial
+  name: Trial
+  price: 0
+  currency: USDC
+  period: none
+  included: 50 sanitizations per wallet_address
+  how: 'tx_hash: TRIAL on POST /sanitize'
+  limits: ['10,000 characters per request', 'quota is per wallet_address string and, per SKILL.md, trust-based rather than cryptographically verified']
+  proof: none — "Only paid sanitizations are anchored on Solana"
+- id: pay_per_call
+  name: Pay per call
+  price: 0.01
+  currency: USDC
+  period: per call
+  billing: x402 v2 — HTTP 402 challenge, retry with PAYMENT-SIGNATURE (X-PAYMENT legacy); verified and settled by the PayAI facilitator
+  networks: ['base-mainnet eip155:8453 (preferred)', 'solana-mainnet']
+  endpoints: ['POST /sanitize/quick (pay-per-call only; no TRIAL/tx_hash)', 'POST /sanitize (coexists with TRIAL/bundle)']
+  pay_to: {base: '0xCf1d31020A7915421f6d66B9835Dcb6f422337E7', solana: 'giu4VciTkfWJNG1oeP6SzHEJwmabikJSMB91GaFNWE4'}
+  observed: 'GET https://api.trustboost.dev/sanitize 402 — accepts[].amount "10000" (USDC, 6 decimals) on both networks, maxTimeoutSeconds 300'
+  note: llms.txt labels this "v2.7+"; the agent card quotes 0.0149 per call instead.
+- id: prepaid_bundle
+  name: Prepaid bundle
+  price: 149
+  currency: USDC
+  period: one-time; 10,000 sanitizations
+  unit_price: 0.0149 USDC per sanitization
+  billing: send 149 USDC to the Solana payment address, retry POST /sanitize with the resulting tx_hash (verified via Helius); each tx_hash usable once
+  networks: [solana-mainnet]
+  pay_to: {solana: 'giu4VciTkfWJNG1oeP6SzHEJwmabikJSMB91GaFNWE4'}
+  included: ['10,000 calls', 'Proof of Sanitization anchored on Solana for every call, verifiable at GET /verify/{anchor_tx}', 'audit trail (pricing.md: "90-day retention")']
+  discovery: /.well-known/x402 advertises this bundle (amount 149000000)
+  refunds: 'GET /preflight: "Unused quota non-refundable. Contact dispute_path within 48h of payment for issues."'
+free_endpoints:
+  source: GET /pricing free_endpoints[]
+  entries: ['GET /preflight', 'GET /policy', 'GET /health', 'GET /.well-known/agent-card.json', 'GET /openapi.json', 'GET /verify/{anchor_tx}', 'GET /score/{wallet_address}']
+enterprise:
+  published: false
+  note: 'README: "For enterprise inquiries: teodorofodocrispin@gmail.com". No enterprise tier or contract pricing is published.'

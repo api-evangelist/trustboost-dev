@@ -1,0 +1,116 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for the TrustBoost PII Sanitizer API
+  version: 1.0.0
+extends: ../openapi/trustboost-dev-openapi.json
+x-generated: '2026-09-19'
+x-method: generated
+x-source: >-
+  Generated from openapi/trustboost-dev-openapi.json plus the probed and searched artifacts in this repo.
+  Captures API Evangelist annotations without mutating the provider's contract. Every route and status
+  named below was observed live or documented by the provider; nothing is proposed that does not exist.
+actions:
+- target: $.info
+  description: Link the provider's other machine-readable surfaces from the contract.
+  update:
+    x-agent-card: https://api.trustboost.dev/.well-known/agent-card.json
+    x-agent-description: https://api.trustboost.dev/.well-known/agent-description.json
+    x-mcp-server: https://api.trustboost.dev/mcp
+    x-mcp-server-card: https://api.trustboost.dev/.well-known/mcp-server-card.json
+    x-llms-txt: https://api.trustboost.dev/llms.txt
+    x-pricing: https://api.trustboost.dev/pricing
+    x-privacy-policy: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/PRIVACY.md
+    x-repository: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer
+    x-payment:
+      protocol: x402 v2
+      discovery: https://api.trustboost.dev/.well-known/x402
+      challenge_status: 402
+      challenge_header: PAYMENT-REQUIRED
+      payment_header: PAYMENT-SIGNATURE (X-PAYMENT legacy)
+      rails: ['eip155:8453 USDC $0.01/call', 'solana mainnet USDC $0.01/call or 149 USDC per 10,000 via tx_hash']
+      preflight: https://api.trustboost.dev/preflight
+      policy_hash: https://api.trustboost.dev/policy
+- target: $.info
+  description: Record the limits documented in prose, since no rate-limit headers are declared.
+  update:
+    x-rate-limits:
+    - {scope: per-ip, resource: 'POST /sanitize/preview', limit: 3, window: 1h}
+    - {scope: per-wallet_address, resource: 'POST /sanitize with tx_hash TRIAL', limit: 50, window: lifetime, exhaustion_status: 402}
+    - {scope: per-request, resource: 'POST /sanitize text', limit: '10,000 characters', exhaustion_status: 413}
+    - {scope: per-request, resource: 'POST /sanitize/preview text', limit: '500 characters'}
+- target: $.info
+  description: >-
+    Routes the provider documents (llms.txt, pricing, README) and serves live but does not declare in this
+    contract — recorded so a consumer knows they exist and knows they are unspecified.
+  update:
+    x-undeclared-routes:
+    - {method: POST, path: /redact, alias_of: /sanitize, observed: 'GET 402'}
+    - {method: POST, path: /detect, alias_of: /sanitize/preview, observed: 'GET 402'}
+    - {method: POST, path: /demo, alias_of: /sanitize/preview, observed: 'GET 405'}
+    - {method: POST, path: /sanitize/quick, description: 'pay-per-call only, x402 v2, $0.01 USDC', observed: 'GET 402'}
+    - {method: GET, path: '/anchor/{anchor_tx}', alias_of: '/verify/{anchor_tx}', observed: '404 for unknown tx'}
+    - {method: GET, path: /preflight, observed: 200}
+    - {method: GET, path: /policy, observed: 200}
+- target: $.servers[0]
+  description: Note that this is the provider's only host; the apex domain does not resolve.
+  update:
+    x-note: api.trustboost.dev is the sole host (Render behind Cloudflare). trustboost.dev and www.trustboost.dev have no DNS A record.
+- target: $.paths['/sanitize'].post
+  description: Tag, payment semantics, and the responses documented outside the contract.
+  update:
+    tags: [Sanitization]
+    x-payment-gate: 'tx_hash TRIAL (50/wallet) | Solana bundle tx_hash | x402 PAYMENT-SIGNATURE'
+    x-idempotency: none — a retry consumes quota again; bundle tx_hash is single-use (409)
+    x-mcp-tool: sanitize_pii
+    x-a2a-skill: sanitize_pii
+    x-documented-responses-not-declared:
+      '409': 'TX_HASH_ALREADY_USED — "Each tx_hash can only be used once." (SKILL.md)'
+      '422': 'FastAPI validation error {detail: [{type, loc, msg, input}]}'
+- target: $.paths['/sanitize'].get
+  description: Tag the x402 discovery operation and record the observed challenge.
+  update:
+    tags: [Payment]
+    x-observed: 'HTTP 402 with PAYMENT-REQUIRED header; body x402Version 2, accepts[] eip155:8453 and solana mainnet, amount 10000 (USDC 6 decimals), maxTimeoutSeconds 300'
+- target: $.paths['/sanitize/preview'].post
+  update:
+    tags: [Sanitization]
+    x-free-tier: '3 per IP per hour, 500 characters, no wallet, zero retention'
+    x-aliases: [/demo, /detect]
+- target: $.paths['/score/{wallet_address}'].get
+  update:
+    tags: [Trust]
+    x-a2a-skill: trustboost_score
+    x-observed: 'GET /score/probe 200 {"trust_tier":"NEW","trustboost_score":null,"history":{"total_requests":0}}'
+    x-enum-trust_tier: [NEW, ACTIVE, VERIFIED, TRUSTED]
+- target: $.paths['/verify/{anchor_tx}'].get
+  update:
+    tags: [Trust]
+    x-a2a-skill: verify_proof
+    x-aliases: ['/anchor/{anchor_tx}']
+    x-observed: 'GET /verify/probe 404 {"status":"not_found","note":"Only paid sanitizations are anchored on Solana"}'
+- target: $.paths['/budget/{operator_id}'].get
+  update:
+    tags: [Governance]
+    x-observed: 'GET /budget/probe 200 {"budget_active":false,"message":"No privacy budget registered for this operator. Unlimited access."}'
+- target: $.paths['/health'].get
+  update:
+    tags: [Operations]
+    x-observed: '200 {"status":"ok","version":"2.6.0","service":"TrustBoost-PII-Sanitizer","infrastructure":"FastAPI+Supabase+Render"}'
+- target: $.paths['/mcp'].post
+  update:
+    tags: [Protocols]
+    x-mcp: {protocolVersion: '2024-11-05', serverInfo: {name: trustboost, version: 2.6.0}, tools: [sanitize_pii], schema_key: input_schema (non-standard)}
+- target: $.paths['/message/send'].post
+  update:
+    tags: [Protocols]
+    x-observed: 'POST with a JSON-RPC 2.0 body → 422 body.message Field required; GET → 405. A REST route, not A2A JSONRPC.'
+- target: $
+  description: Declare the tags the actions above apply; the provider's contract declares none.
+  update:
+    tags:
+    - {name: Sanitization, description: Redact PII from text}
+    - {name: Payment, description: x402 discovery}
+    - {name: Trust, description: Proof of Sanitization and TrustBoost Score}
+    - {name: Governance, description: Privacy budget}
+    - {name: Operations, description: Health}
+    - {name: Protocols, description: MCP and A2A ingress routes}

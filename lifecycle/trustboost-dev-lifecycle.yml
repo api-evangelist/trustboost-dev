@@ -1,0 +1,69 @@
+generated: '2026-09-19'
+method: searched
+source: https://api.trustboost.dev/openapi.json
+derived_from: openapi/trustboost-dev-openapi.json
+docs:
+- https://api.trustboost.dev/policy
+- https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/PRIVACY.md
+versioning:
+  scheme: unversioned paths; one product version carried in every surface
+  current_version: 2.6.0
+  consistency: >-
+    2.6.0 in OpenAPI info.version, the agent card, /health, MCP serverInfo, the MCP server card, the ANP
+    description, /pricing, /preflight, /policy (policy_version), SKILL.md and plugin.json — the surfaces agree.
+    llms.txt refers to POST /sanitize/quick as "v2.7+", so the pay-per-call route is documented ahead of a
+    version bump the other surfaces have not made.
+  spec_url: https://api.trustboost.dev/openapi.json
+  base_url: https://api.trustboost.dev
+  policy_published: false
+  note: No versioning policy page. No version segment in any path.
+deprecation:
+  policy_published: false
+  sunset_header: false
+  deprecation_header: false
+  rfc8594: false
+  deprecated_operations: []
+  documented_legacy:
+  - what: X-PAYMENT header for x402 pay-per-call
+    status: 'legacy v1, "also accepted"'
+    replacement: PAYMENT-SIGNATURE
+    evidence: 'llms.txt: "PAYMENT-SIGNATURE header (X-PAYMENT also accepted, legacy v1)"; the 402 body payment_flow step 3 repeats it.'
+    note: A soft deprecation stated in prose with no removal date. No Deprecation pointer is emitted.
+  note: Zero operations carry deprecated true; no deprecation or changelog page exists on the host (/changelog and /CHANGELOG.md both 404).
+status_page:
+  url: null
+  probed:
+  - {url: 'https://api.trustboost.dev/status', status: 404}
+  - {url: 'https://api.trustboost.dev/healthz', status: 404}
+  live_signal:
+    url: https://api.trustboost.dev/health
+    status: 200
+    observed: '{"status":"ok","version":"2.6.0","service":"TrustBoost-PII-Sanitizer","infrastructure":"FastAPI+Supabase+Render","features":[...]}'
+    note: A liveness endpoint, not a status page — no incident history, no uptime record. /preflight points at it as uptime_url. No StatusPage pointer is emitted.
+sla:
+  published: false
+  stated_figures:
+  - {figure: 'uptime_percent: 99.9', source: agent card performance block, note: 'a self-description in a discovery document, not a commitment with remedies'}
+  - {figure: 'latency_ms: 200', source: agent card performance block and README ("Avg latency ~200ms")}
+  note: No SLA document. The /preflight revocation text is the only remedy-shaped statement — "Unused quota non-refundable. Contact dispute_path within 48h of payment for issues."
+policy_versioning:
+  url: https://api.trustboost.dev/policy
+  observed: '{"policy_version":"2.6.0","policy_hash":"sha256:8ade2884...0a24fb","terms_url":".../PRIVACY.md","last_updated":"2026-05-29","binding":true,"note":"Store this hash. If it changes, re-evaluate before paying."}'
+  note: >-
+    A hash-versioned terms pointer an agent is told to store and compare before each payment — a real,
+    machine-checkable change signal for the terms, even though there is no API changelog.
+changelog:
+  published: false
+  probed:
+  - {url: 'https://api.trustboost.dev/changelog', status: 404}
+  - {url: 'https://api.github.com/repos/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/releases', result: 'empty — no releases, no tags'}
+  dated_signals:
+  - {date: '2026-04-01', what: 'GitHub repository created'}
+  - {date: '2026-04-08', what: 'PRIVACY.md v1.0 and v2.0'}
+  - {date: '2026-04-21', what: 'v1.0 evaluated (AGENT_EVALUATION.md); v1.0 ran on Make.com'}
+  - {date: '2026-04-27', what: 'v2.0 — FastAPI + Supabase + Render infrastructure; PRIVACY.md v3.0'}
+  - {date: '2026-05-17', what: 'PRIVACY.md v4.0 for TrustBoost v2.6.0 (context modes, privacy budget, TrustBoost Score, MCP server)'}
+  - {date: '2026-05-27', what: 'ANP agent-description published date'}
+  - {date: '2026-05-29', what: '/policy last_updated'}
+  - {date: '2026-08-29', what: 'last push to the GitHub repository'}
+  - {date: '2026-09-19', what: 'sitemap.xml lastmod on every URL (dynamic)'}

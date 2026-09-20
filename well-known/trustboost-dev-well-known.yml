@@ -1,0 +1,133 @@
+generated: '2026-09-19'
+method: probed
+source: >-
+  Live GET probes of the named /.well-known/* path list on trustboost.dev, www.trustboost.dev and
+  api.trustboost.dev, 2026-09-19. Every row below is a request that was actually issued; every status is the
+  one returned. Status 0 means the TCP connection could not be made because the name has no DNS record.
+summary:
+  hosts_probed: 3
+  hosts_resolving: 1
+  paths_probed: 25
+  documents_served: 5
+  hit_count: 5
+  path_echo_control: passed
+  note: >-
+    api.trustboost.dev is the provider's only host (a Render service behind Cloudflare; trustboost.dev and
+    www.trustboost.dev have no A record). It serves five well-known documents, all agent-discovery shaped:
+    the A2A agent card, an ANP agent-description (did:web), an MCP server card (/.well-known/mcp.json 301s
+    to it), and an x402 v2 discovery document at both /.well-known/x402 and /.well-known/x402.json. Every
+    other named path returns FastAPI's real JSON 404 ({"detail":"Not Found"}, 22 bytes), not an SPA shell,
+    and a negative-control path also 404s, so the 200s are served documents. No security.txt (RFC 9116), no
+    OAuth/OIDC discovery (RFC 8414/9728 — the MCP server is on this same host and serves no
+    protected-resource metadata), no RFC 9727 API catalog, no APIs.json, no AAuth resource document, no
+    UCP/ACP manifest. The GitHub repo contains an ai-plugin.json, but it is NOT served at
+    /.well-known/ai-plugin.json.
+hosts:
+- host: api.trustboost.dev
+  role: Website (canonical), API (OpenAPI servers[]), MCP server host and A2A host — one origin
+  documents:
+  - path: /.well-known/agent-card.json
+    status: 200
+    content_type: application/json
+    bytes: 6182
+    file: ../a2a/trustboost-dev-agent-card.json
+    standard: A2A Agent Card (no protocolVersion; graded flavored)
+    note: Saved verbatim under a2a/ and graded in a2a/trustboost-dev-a2a.yml.
+  - path: /.well-known/agent.json
+    status: 404
+    note: Legacy pre-0.3 agent-card path. Not served.
+  - path: /.well-known/agent-description.json
+    status: 200
+    content_type: application/json
+    bytes: 7348
+    file: trustboost-dev-agent-description.json
+    standard: Agent Network Protocol (ANP) AgentDescription, JSON-LD, id did:web:api.trustboost.dev
+    note: Advertised in the provider's sitemap.xml and llms-full.txt. Saved verbatim.
+  - path: /.well-known/mcp.json
+    status: 301
+    redirect: https://api.trustboost.dev/.well-known/mcp-server-card.json
+  - path: /.well-known/mcp-server-card.json
+    status: 200
+    content_type: application/json
+    bytes: 559
+    file: trustboost-dev-mcp-server-card.json
+    standard: provider-defined MCP server card (schema_version v1; url https://api.trustboost.dev/mcp, tools [sanitize_pii], auth none)
+  - path: /.well-known/x402
+    status: 200
+    content_type: application/json
+    bytes: 953
+    file: trustboost-dev-x402.json
+    standard: x402 v2 discovery document (x402Version 2, accepts[] exact scheme on solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp, USDC, amount 149000000)
+  - path: /.well-known/x402.json
+    status: 200
+    content_type: application/json
+    bytes: 953
+    file: trustboost-dev-x402.json
+    note: Same body as /.well-known/x402; both paths are served.
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    note: 'This is also the MCP resource host (https://api.trustboost.dev/mcp); no RFC 9728 metadata is served for it. The MCP server card declares auth {type: none}.'
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/api-catalog.json
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    note: An ai-plugin.json exists in the GitHub repository root but is not served from the host.
+  - path: /.well-known/ucp.json
+    status: 404
+  - path: /.well-known/acp.json
+    status: 404
+  - path: /.well-known/aauth-resource.json
+    status: 404
+  - path: /.well-known/apis.json
+    status: 404
+  - path: /apis.json
+    status: 404
+  - path: /apis.yml
+    status: 404
+  - path: /llms.txt
+    status: 200
+    content_type: text/plain; charset=utf-8
+    bytes: 7766
+    file: ../llms/trustboost-dev-llms.txt
+    note: Not a well-known path; recorded here because it is the host's primary discovery document alongside the card.
+  - path: /.well-known/trustboost-negative-control-7f3a91.json
+    status: 404
+    control: negative
+    note: A path that cannot exist. Its 404 proves the host does not echo or catch-all /.well-known/* requests.
+- host: trustboost.dev
+  role: Registrable domain — no DNS A/AAAA record; nothing is served here
+  dns:
+    a: []
+    ns: [dns1.registrar-servers.com, dns2.registrar-servers.com]
+    mx: [eforward1-5.registrar-servers.com (Namecheap email forwarding)]
+    txt: ['v=spf1 include:spf.efwd.registrar-servers.com ~all']
+  documents:
+  - {path: /.well-known/agent-card.json, status: 0, note: 'connection failed — no DNS record (curl exit 6)'}
+  - {path: /.well-known/agent.json, status: 0}
+  - {path: /.well-known/security.txt, status: 0}
+  - {path: /.well-known/openid-configuration, status: 0}
+  - {path: /.well-known/oauth-authorization-server, status: 0}
+  - {path: /.well-known/oauth-protected-resource, status: 0}
+  - {path: /.well-known/api-catalog, status: 0}
+  - {path: /.well-known/ai-plugin.json, status: 0}
+  - {path: /.well-known/apis.json, status: 0}
+  - {path: /apis.json, status: 0}
+  - {path: /llms.txt, status: 0}
+- host: www.trustboost.dev
+  role: Not configured — no DNS record
+  documents:
+  - {path: /.well-known/agent-card.json, status: 0, note: 'connection failed — no DNS record'}
+  - {path: /.well-known/security.txt, status: 0}
+  - {path: /.well-known/openid-configuration, status: 0}
+  - {path: /.well-known/oauth-authorization-server, status: 0}
+  - {path: /.well-known/oauth-protected-resource, status: 0}

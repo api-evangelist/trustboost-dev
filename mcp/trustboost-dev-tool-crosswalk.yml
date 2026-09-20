@@ -1,0 +1,89 @@
+generated: '2026-09-19'
+method: derived
+source: mcp/trustboost-dev-mcp-tools.json + a2a/trustboost-dev-agent-card.json + openapi/trustboost-dev-openapi.json
+summary: >-
+  Three agent doors onto one function. The MCP server exposes one tool and the agent card three skills; the
+  REST contract has nine operations. Every tool and skill binds cleanly to a REST operationId by name, and the
+  live MCP tools/list was NOT gated, so the bindings are by observed schema, not by inference. The REST
+  contract is the superset: the context mode, the free preview, the privacy budget, health and the two ingress
+  routes exist only there.
+surfaces:
+  openapi:
+    file: openapi/trustboost-dev-openapi.json
+    url: https://api.trustboost.dev/openapi.json
+    operations: 9
+  mcp:
+    endpoint: https://api.trustboost.dev/mcp
+    tools_list: open (anonymous, 200)
+    tools: 1
+    schema_key: input_schema (non-standard; spec says inputSchema)
+  a2a:
+    card: https://api.trustboost.dev/.well-known/agent-card.json
+    endpoint: POST https://api.trustboost.dev/message/send (not JSON-RPC; requires body.message)
+    skills: 3
+  graphql: none
+crosswalk:
+- tool: sanitize_pii
+  surface: mcp
+  category: sanitization
+  rest: [sanitize_pii]
+  binding: rest
+  confidence: high
+  note: >-
+    Same name, same three body fields (text, tx_hash, wallet_address). The MCP schema omits the REST
+    operation's optional context enum, so an MCP caller always gets context=general.
+- tool: sanitize_pii
+  surface: a2a-skill
+  category: sanitization
+  rest: [sanitize_pii]
+  binding: rest
+  confidence: high
+  note: Skill id matches the operationId; the skill description names sanitized_content, safety_score, risk_category and entities[], which are the REST 200 schema's data properties.
+- tool: verify_proof
+  surface: a2a-skill
+  category: proof
+  rest: [verify_proof]
+  binding: rest
+  confidence: high
+  note: GET /verify/{anchor_tx}; the card's trust.proof_endpoint names the same path.
+- tool: trustboost_score
+  surface: a2a-skill
+  category: trust
+  rest: [get_trustboost_score]
+  binding: rest
+  confidence: high
+  note: GET /score/{wallet_address}; the card's trust.score_endpoint names the same path and the same four tiers.
+mcp_only: []
+rest_only:
+- capability: x402 discovery
+  operations: [sanitize_discovery]
+  note: GET /sanitize returns 402 with a PAYMENT-REQUIRED header — the x402 handshake, not a tool.
+- capability: free preview
+  operations: [sanitize_preview]
+  note: 3 per IP per hour, 500 characters, no wallet. The card lists it as endpoints.preview / tiers.preview but no skill or tool wraps it.
+- capability: privacy budget
+  operations: [get_budget_status]
+- capability: health
+  operations: [health_check]
+- capability: protocol ingress
+  operations: [mcp_execute, a2a_message_send]
+  note: The MCP and A2A endpoints themselves, declared as REST operations without request schemas.
+undeclared_routes:
+  note: Routes the provider documents in llms.txt, pricing and the README that the OpenAPI does not declare; live-probed 2026-09-19 with GET (the write routes correctly refuse GET, which confirms they exist).
+  routes:
+  - {route: 'POST /redact', alias_of: sanitize_pii, get_status: 402}
+  - {route: 'POST /detect', alias_of: sanitize_preview, get_status: 402}
+  - {route: 'POST /demo', alias_of: sanitize_preview, get_status: 405}
+  - {route: 'POST /sanitize/quick', description: 'pay-per-call only, x402 v2, $0.01 USDC, no TRIAL', get_status: 402}
+  - {route: 'GET /anchor/{anchor_tx}', alias_of: verify_proof, get_status: 404 for an unknown tx}
+  - {route: 'GET /preflight', description: 'allow/caution/block + price + policy hash + dispute path', get_status: 200}
+  - {route: 'GET /policy', description: 'sha256 of current terms, terms_url, last_updated', get_status: 200}
+coverage:
+  mcp_tools_named: 1
+  mcp_tools_bound: 1
+  a2a_skills_named: 3
+  a2a_skills_bound: 3
+  mcp_only: 0
+  rest_operations_total: 9
+  rest_operations_with_a_tool_or_skill: 3
+  rest_only: 6

@@ -1,23 +1,198 @@
 aid: trustboost-dev
 name: TrustBoost PII Sanitizer
-description: 'TrustBoost PII Sanitizer is a company surfaced via the API Evangelist harvest backlog (source:
-  a2a-registry) and added to the network as a stub for full-pipeline profiling.'
+description: >-
+  TrustBoost PII Sanitizer is a pay-per-call "privacy firewall" for autonomous AI agent pipelines, built and
+  operated by an individual developer (Teodoro Crispin, GitHub teodorofodocrispin-cmyk) and served entirely
+  from https://api.trustboost.dev — the apex trustboost.dev has no DNS record. An agent POSTs text to
+  /sanitize and gets it back with emails, phone numbers, national IDs (RFC, CUIT, CPF, CNPJ, Personalausweis,
+  マイナンバー, NIR, Codice Fiscale, RRN and more across 8 languages), API keys and financial data replaced by
+  [REDACTED], plus a safety_score, a risk_category and an entity list; five context modes (general, legal,
+  financial, medical, code) tune the redaction. There is no account and no API key: 50 free calls per wallet
+  with tx_hash=TRIAL, a free 3-per-hour preview, then x402 payment in USDC on Base or Solana ($0.01 per call or
+  a 149 USDC prepaid bundle of 10,000), with every paid sanitization anchored on Solana as a verifiable "Proof
+  of Sanitization". The same service is exposed three ways from one host: a 9-operation OpenAPI 3.0.0 REST
+  contract, a remote MCP server at /mcp (one tool, sanitize_pii), and an A2A-flavored agent card at
+  /.well-known/agent-card.json with three skills. The provider's own privacy policy describes it as a learning
+  prototype that sends raw text to OpenAI GPT-4o-mini for detection and has no certified security audit.
 url: https://raw.githubusercontent.com/api-evangelist/trustboost-dev/refs/heads/main/apis.yml
+image: https://raw.githubusercontent.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/main/logo.png
 x-type: company
 x-source: harvest:a2a-registry
-x-tier: stub
-x-tier-reason: harvest
+x-tier: profiled
+x-tier-reason: enrichment pass 2026-09-19 (local-v3; was a2a-registry harvest stub)
 specificationVersion: '0.20'
 created: '2026-09-19'
 modified: '2026-09-19'
 tags:
-- Company
-apis: []
+- Privacy
+- PII Redaction
+- Data Protection
+- LLM Security
+- AI Safety
+- Agents
+- A2A
+- MCP
+- x402
+- Agent Commerce
+- Solana
+- Compliance
+- agent-native
+tags_raw:
+- Privacy
+- PII redaction
+- Data protection
+- LLM security
+- AI safety
+- Agents
+- A2A
+- MCP
+- x402
+- Agent commerce
+- Solana
+- Compliance
+- Agent-native
+apis:
+- aid: trustboost-dev:trustboost-pii-sanitizer-api
+  name: TrustBoost PII Sanitizer API
+  description: >-
+    REST contract for the sanitizer: POST /sanitize (redact PII from up to 10,000 characters with an optional
+    context mode, gated by tx_hash=TRIAL, an x402 payment header or a Solana bundle tx_hash), POST
+    /sanitize/preview (free, 3 per IP per hour, 500 characters), GET /score/{wallet_address} (TrustBoost Score
+    and NEW/ACTIVE/VERIFIED/TRUSTED tier), GET /verify/{anchor_tx} (verify a Proof of Sanitization on Solana),
+    GET /budget/{operator_id} (privacy budget), GET /health, plus the MCP and A2A ingress routes. 9
+    operations across 9 paths, published as OpenAPI 3.0.0 at https://api.trustboost.dev/openapi.json with
+    servers[] https://api.trustboost.dev. The llms.txt and pricing pages document further routes the contract
+    omits (/redact, /detect, /demo, /sanitize/quick, /preflight, /policy, /anchor).
+  humanURL: https://api.trustboost.dev/
+  baseURL: https://api.trustboost.dev
+  tags:
+  - Privacy
+  - PII Redaction
+  - x402
+  - LLM Security
+  properties:
+  - type: OpenAPI
+    url: openapi/trustboost-dev-openapi.json
+  - type: OpenAPI
+    name: TrustBoost PII Sanitizer OpenAPI (provider-hosted)
+    url: https://api.trustboost.dev/openapi.json
+  - type: Documentation
+    url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer
+  - type: APIReference
+    url: https://api.trustboost.dev/openapi.json
+  - type: Overlay
+    url: overlays/trustboost-dev-openapi-overlay.yaml
+- aid: trustboost-dev:trustboost-mcp-server
+  name: TrustBoost MCP Server
+  description: >-
+    Remote Model Context Protocol server at https://api.trustboost.dev/mcp (HTTP JSON-RPC 2.0, protocol
+    version 2024-11-05, serverInfo trustboost 2.6.0). initialize and tools/list answer anonymously with one
+    tool, sanitize_pii, whose schema is published under the non-standard key input_schema rather than the MCP
+    inputSchema; resources/list and prompts/list return -32601. Paid use is gated by x402 (HTTP 402) or a
+    tx_hash, not by authentication. A server card is served at /.well-known/mcp-server-card.json (with
+    /.well-known/mcp.json 301ing to it), and the server is listed on Glama.
+  humanURL: https://api.trustboost.dev/
+  baseURL: https://api.trustboost.dev/mcp
+  tags:
+  - MCP
+  - agent-native
+  - Privacy
+  properties:
+  - type: MCPServer
+    url: mcp/trustboost-dev-mcp.yml
+  - type: MCPServer
+    name: TrustBoost MCP endpoint (HTTP JSON-RPC)
+    url: https://api.trustboost.dev/mcp
+  - type: ToolCrosswalk
+    url: mcp/trustboost-dev-tool-crosswalk.yml
+- aid: trustboost-dev:trustboost-a2a-agent
+  name: TrustBoost A2A Agent
+  description: >-
+    Agent2Agent surface: an agent card served from https://api.trustboost.dev/.well-known/agent-card.json
+    (version 2.6.0, no protocolVersion, capabilities object of product flags, three skills — sanitize_pii,
+    verify_proof, trustboost_score) and a POST /message/send route the provider calls its A2A endpoint. The
+    route is a plain FastAPI handler that requires a top-level "message" body field and rejects a JSON-RPC 2.0
+    envelope with 422, so the transport is not A2A JSONRPC; the card is graded flavored in
+    a2a/trustboost-dev-a2a.yml. An ANP agent-description document (did:web:api.trustboost.dev) is served
+    alongside it.
+  humanURL: https://api.trustboost.dev/
+  baseURL: https://api.trustboost.dev/message/send
+  tags:
+  - A2A
+  - agent-native
+  - x402
+  properties:
+  - type: AgentCard
+    url: a2a/trustboost-dev-a2a.yml
+  - type: AgentCard
+    name: A2A Agent Card (provider-hosted)
+    url: https://api.trustboost.dev/.well-known/agent-card.json
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: DomainSecurity
+  url: security/trustboost-dev-domain-security.yml
 - type: Website
-  url: https://trustboost.dev/
+  url: https://api.trustboost.dev/
+- type: Documentation
+  url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer
+- type: GettingStarted
+  url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/AGENTS.md
+- type: APIReference
+  url: https://api.trustboost.dev/openapi.json
+- type: Pricing
+  url: https://api.trustboost.dev/pricing.md
+- type: PrivacyPolicy
+  url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/PRIVACY.md
+- type: TermsOfService
+  url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/PRIVACY.md
+- type: Support
+  url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/issues
+- type: GitHubOrganization
+  url: https://github.com/teodorofodocrispin-cmyk
+- type: AgentCard
+  url: a2a/trustboost-dev-a2a.yml
+- type: MCPServer
+  url: mcp/trustboost-dev-mcp.yml
+- type: WellKnown
+  url: well-known/trustboost-dev-well-known.yml
+- type: LLMsTxt
+  url: llms/trustboost-dev-llms.txt
+- type: AgentSkill
+  url: skills/_index.yml
+- type: Conventions
+  url: conventions/trustboost-dev-conventions.yml
+- type: ErrorCatalog
+  url: errors/trustboost-dev-problem-types.yml
+- type: DataModel
+  url: data-model/trustboost-dev-data-model.yml
+- type: RateLimits
+  url: rate-limits/trustboost-dev-rate-limits.yml
+- type: Plans
+  url: plans/trustboost-dev-plans-pricing.yml
+- type: Sandbox
+  url: sandbox/trustboost-dev-sandbox.yml
+- type: Conformance
+  url: conformance/trustboost-dev-conformance.yml
+- type: Lifecycle
+  url: lifecycle/trustboost-dev-lifecycle.yml
+- type: Packages
+  url: packages/trustboost-dev-packages.yml
+- type: Authentication
+  url: authentication/trustboost-dev-authentication.yml
+- type: DataSubjectRequest
+  url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/PRIVACY.md
+- type: Subprocessors
+  url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/PRIVACY.md
+- type: DataResidency
+  url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/PRIVACY.md
+- type: AITransparency
+  url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/PRIVACY.md
+x-enrichment:
+  date: '2026-09-19'
+  status: enriched
+  artifacts_added: 28
+  pass: local-v3

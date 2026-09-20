@@ -1,0 +1,58 @@
+generated: '2026-09-19'
+method: searched
+source: https://api.trustboost.dev/pricing.md
+docs:
+- https://api.trustboost.dev/openapi.json
+- https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/PRIVACY.md
+- https://api.trustboost.dev/preflight
+limit_count: 3
+summary: >-
+  TrustBoost publishes quotas and size caps rather than a requests-per-second ceiling: a per-IP hourly cap on
+  the free preview, a per-wallet lifetime TRIAL quota, per-request character limits, and an operator-configured
+  "Privacy Budget" with daily and per-context limits. No rate-limit headers are declared or observed; the
+  remaining-quota signal travels in the response body (usage_metrics.quota_remaining, requests_remaining) and
+  exhaustion of paid/TRIAL quota surfaces as HTTP 402, not 429. Observed live: /health and /pricing responses
+  carry no RateLimit-*, X-RateLimit-* or Retry-After header.
+rate_limits:
+- name: Free preview per IP
+  scope: per-ip
+  limit: 3
+  window: 1 hour
+  metric: request
+  applies_to: [sanitize_preview, 'POST /demo', 'POST /detect']
+  exhaustion_status: undocumented
+  signal_in_body: requests_remaining (documented example shows 2 after the first call)
+  source: pricing.md "3 requests per IP per hour"; agent card tiers.preview quota_scope per_ip_per_hour
+- name: TRIAL sanitizations per wallet
+  scope: per-wallet_address
+  limit: 50
+  window: lifetime of the wallet_address string (no reset documented)
+  metric: sanitization
+  applies_to: [sanitize_pii, MCP tool sanitize_pii, A2A skill sanitize_pii]
+  exhaustion_status: 402
+  exhaustion_code: QUOTA_EXHAUSTED_OR_PAYMENT_REQUIRED
+  signal_in_body: usage_metrics {quota_remaining, quota_limit}
+  source: pricing.md; SKILL.md "API Response (Error 402)" with trial_info {quota_used 50, quota_limit 50, quota_remaining 0}
+  note: 'SKILL.md: "TRIAL is trust-based: Per-wallet quota tracking is not cryptographically verified."'
+- name: Privacy Budget per operator
+  scope: per-operator_id
+  limit: null
+  window: daily
+  metric: sanitization
+  applies_to: [sanitize_pii]
+  configured_by: 'the operator ("Operator-configured limits stored in agent_budgets table: operator_id, daily_limit, context_limit, is_active" — PRIVACY.md v4.0)'
+  check: 'GET /budget/{operator_id} (get_budget_status) — observed for an unknown id {"budget_active":false,"message":"No privacy budget registered for this operator. Unlimited access."}'
+  exhaustion_status: undocumented
+  source: PRIVACY.md; SKILL.md metadata.features "privacy_budget_per_agent (configurable daily limits)"
+  note: The mechanism to register a budget is not documented on any public surface found; only the read endpoint is.
+size_and_time_limits:
+- {name: Text length on /sanitize, limit: '10,000 characters', exhaustion_status: 413, source: 'openapi sanitize_pii text description "Max 10,000 chars."; response 413 "Text too long — split into chunks"'}
+- {name: Text length on /sanitize/preview, limit: '500 characters', exhaustion_status: undocumented, source: 'openapi sanitize_preview description; pricing.md'}
+- {name: x402 payment timeout, limit: '300 seconds (maxTimeoutSeconds)', source: 'observed PaymentRequirements accepts[] on GET /sanitize'}
+- {name: Bundle quota, limit: '10,000 sanitizations per 149 USDC tx_hash', exhaustion_status: 402, source: pricing.md}
+- {name: Dispute window, limit: '48h of payment', source: 'GET /preflight revocation'}
+exhaustion:
+  status: 402
+  headers: []
+  media_type: application/json
+  note: 429 is not documented anywhere and was not observed; quota exhaustion is expressed as a payment challenge.

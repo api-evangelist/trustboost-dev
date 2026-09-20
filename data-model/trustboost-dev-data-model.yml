@@ -1,0 +1,80 @@
+generated: '2026-09-19'
+method: derived
+source: openapi/trustboost-dev-openapi.json
+docs:
+- https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/PRIVACY.md
+- https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/SKILL.md
+summary: >-
+  Derived from the inline request/response schemas (the contract declares no components), the documented
+  response examples in SKILL.md/README.md/AGENTS.md, and the storage description in PRIVACY.md v4.0. Two
+  roots: the WALLET (wallet_address — a caller-chosen string that is the quota identity and the subject of the
+  TrustBoost Score) and the PAYMENT (a tx_hash — TRIAL or a Solana transaction — or an x402 payment
+  signature). Each Sanitization joins the two, produces zero or more detected Entities, and, when paid,
+  anchors one Proof of Sanitization on Solana. A Privacy Budget hangs off an operator_id rather than a wallet.
+  There are no $ref links; the graph is joined by id fields (wallet_address, tx_hash, anchor_tx/solana_tx,
+  operator_id) and resolved with follow-up GETs; there is no expansion parameter.
+id_style:
+  format: caller-supplied strings and chain transaction signatures
+  ids:
+  - {entity: Wallet, field: wallet_address, example: '"your-agent-id" or a public Solana address', note: 'free-form; default "mcp-agent" on the MCP tool'}
+  - {entity: Payment, field: tx_hash, example: '"TRIAL" or a Solana transaction signature', note: single-use for bundles}
+  - {entity: ProofOfSanitization, field: anchor_tx / solana_tx, example: Solana transaction signature, explorer: 'https://solscan.io/tx/{anchor_tx}'}
+  - {entity: PrivacyBudget, field: operator_id, example: '"probe" returned budget_active false'}
+  - {entity: Policy, field: policy_hash, example: 'sha256:8ade2884...'}
+entities:
+- name: Wallet
+  description: The caller's identity for quota and reputation. Any string is accepted; a public Solana address enables per-wallet bundle tracking. Stored for TRIAL quota tracking (PRIVACY.md §2 step 5).
+  fields: [wallet_address]
+  relationships:
+  - {has_many: Sanitization, via: wallet_address}
+  - {has_one: TrustBoostScore, via: wallet_address}
+  - {has_many: Payment, via: wallet_address, note: bundles bought by this wallet}
+- name: Payment
+  description: Evidence that a call is authorized — the literal TRIAL, a Solana bundle tx_hash (149 USDC, 10,000 calls, verified via Helius, single-use), or an x402 PAYMENT-SIGNATURE settled per call by the PayAI facilitator.
+  fields: [tx_hash, license_type, status, amount_required, currency, network, payment_address]
+  relationships:
+  - {belongs_to: Wallet, via: wallet_address}
+  - {has_many: Sanitization, via: tx_hash, note: 'up to 10,000 for a bundle; 50 for TRIAL per wallet'}
+- name: Sanitization
+  description: One /sanitize call and its stored record. PRIVACY.md — stored fields are sanitized output, character count, safety score, risk category, context label, wallet address, tx_hash and timestamp; raw input is never stored.
+  fields: [request_id, sanitized_content, safety_score, risk_category, entities_removed, context_applied, timestamp, usage_metrics.quota_remaining, usage_metrics.quota_limit]
+  enums:
+    risk_category: [CLEAN, SENSITIVE, PRIVATE, CRITICAL]
+    context: [general, legal, financial, medical, code]
+  relationships:
+  - {belongs_to: Wallet, via: wallet_address}
+  - {belongs_to: Payment, via: tx_hash}
+  - {has_many: Entity, via: 'data.entities[]'}
+  - {has_one: ProofOfSanitization, via: 'data.proof_of_sanitization.solana_tx', note: paid calls only}
+- name: Entity
+  description: One detected and redacted PII item, returned inline with the sanitization.
+  fields: [type, category, redacted_text]
+  examples: {type: [full_name, email, mx_rfc], category: [PRIVATE, CRITICAL, SENSITIVE]}
+  relationships:
+  - {belongs_to: Sanitization}
+- name: ProofOfSanitization
+  description: An immutable Solana transaction anchoring the sanitization ("Proof of Sanitization anchored on Solana via Helius"). Read back with GET /verify/{anchor_tx} or /anchor/{anchor_tx}; TRIAL calls have none.
+  fields: [anchor_tx, status, message]
+  relationships:
+  - {belongs_to: Sanitization, via: solana_tx}
+- name: TrustBoostScore
+  description: Aggregated statistics per wallet_address — total sanitizations, average safety score and a trust tier — derived from the audit log (PRIVACY.md v4.0). Read with GET /score/{wallet_address}.
+  fields: [wallet, trustboost_score, trust_tier, history.total_requests, history.first_seen, history.last_seen]
+  enums:
+    trust_tier: [NEW, ACTIVE, VERIFIED, TRUSTED]
+  relationships:
+  - {belongs_to: Wallet, via: wallet_address}
+- name: PrivacyBudget
+  description: 'Operator-configured daily and per-context limits ("agent_budgets table: operator_id, daily_limit, context_limit, is_active" — PRIVACY.md). Read with GET /budget/{operator_id}; no public write path documented.'
+  fields: [operator_id, budget_active, daily_limit, context_limit, is_active]
+  relationships:
+  - {has_many: Sanitization, via: operator_id, note: relationship stated in PRIVACY.md; operator_id is not a field of the /sanitize request schema in the contract}
+- name: Policy
+  description: Hash-versioned terms pointer an agent stores and compares before paying (GET /policy).
+  fields: [policy_version, policy_hash, terms_url, last_updated, binding]
+  relationships: []
+- name: PaymentRequirements
+  description: The x402 v2 challenge object returned on 402 — resource, accepts[] rails, and a bazaar extension with input/output examples and a JSON Schema.
+  fields: [x402Version, resource.url, 'accepts[].scheme', 'accepts[].network', 'accepts[].amount', 'accepts[].payTo', 'accepts[].asset', 'accepts[].maxTimeoutSeconds']
+  relationships:
+  - {produces: Payment, via: PAYMENT-SIGNATURE header on retry}

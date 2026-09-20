@@ -1,0 +1,40 @@
+generated: '2026-09-19'
+method: searched
+source: >-
+  The provider publishes its own Agent Skill: SKILL.md (agentskills.io frontmatter, version 2.6.0, MIT) and an
+  AGENTS.md in github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer, distributed on ClawHub as
+  trustboost-pii-sanitizer. Both are saved verbatim below (method: searched). One further skill was generated
+  by API Evangelist for the read-side flow the provider's skill does not cover, grounded in operationIds
+  verified against openapi/trustboost-dev-openapi.json.
+skills:
+- file: trustboost-dev-pii-sanitizer-SKILL.md
+  name: trustboost-pii-sanitizer
+  method: searched
+  source: https://raw.githubusercontent.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/main/SKILL.md
+  http_status: 200
+  fetched: '2026-09-19'
+  version: 2.6.0
+  license: MIT
+  distribution: https://clawhub.ai/teodorofodocrispin-cmyk/skills/trustboost-pii-sanitizer
+  description: Provider-published skill — sanitize text with TrustBoost before it reaches an LLM, with the payment model, data-handling notice, access modes, response envelopes and language examples the provider wrote.
+  operations: 2
+  operation_ids: [sanitize_pii, sanitize_preview]
+  note: >-
+    Verbatim. It carries the provider's own transparency notices (raw text goes to OpenAI GPT-4o-mini; "learning
+    prototype"; "no certified audit"; prompt-injection risk) which are the most useful thing in it for an agent
+    deciding whether to use the service.
+- file: trustboost-dev-AGENTS.md
+  name: trustboost-agents-md
+  method: searched
+  source: https://raw.githubusercontent.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/main/AGENTS.md
+  http_status: 200
+  fetched: '2026-09-19'
+  description: Provider-published AGENTS.md — when to call TrustBoost, the trial and paid request shapes, the response format, the preflight and verify steps, and the payment details.
+  operations: 3
+  operation_ids: [sanitize_pii, sanitize_preview, verify_proof]
+- file: trustboost-dev-verify-and-score.md
+  name: trustboost-dev-verify-and-score
+  method: generated
+  description: Check a wallet's TrustBoost Score, verify a Proof of Sanitization on Solana, and read a privacy budget — the free read-side operations, with the observed responses for unknown ids.
+  operations: 4
+  operation_ids: [get_trustboost_score, verify_proof, get_budget_status, health_check]

@@ -1,0 +1,45 @@
+generated: '2026-09-19'
+method: searched
+source: registry searches 2026-09-19
+package_count: 0
+packages: []
+searched:
+- {registry: npm, query: 'https://registry.npmjs.org/-/v1/search?text=trustboost&size=10', result: 0 packages}
+- {registry: pypi, query: 'https://pypi.org/pypi/trustboost/json', status: 404}
+- {registry: pypi, query: 'https://pypi.org/pypi/trustboost-pii/json', status: 404}
+- {registry: pypi, query: 'https://pypi.org/pypi/trustboost-pii-sanitizer/json', status: 404}
+- {registry: pypi, query: 'https://pypi.org/pypi/trustboost-sdk/json', status: 404}
+- {registry: github, query: 'https://api.github.com/repos/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer', result: 'the service repository — 7 stars, no releases, no tags, no client library code (tree: SKILL.md, AGENTS.md, PRIVACY.md, README.md, ai-plugin.json, glama.json, manifest.json, molt.json, plugin.json, benchmark.py, index.html, logos)'}
+distributions:
+  note: >-
+    Not packages, but the channels the provider actually distributes through. None has a registry metadata
+    endpoint, so version is read from the artifact itself and published is null (not checked, not
+    checkable) — recorded so a reader does not mistake "no npm package" for "no distribution".
+  entries:
+  - kind: agent-skill
+    registry: clawhub
+    name: trustboost-pii-sanitizer
+    url: https://clawhub.ai/teodorofodocrispin-cmyk/skills/trustboost-pii-sanitizer
+    http_status: 200
+    install: npx clawhub install trustboost-pii-sanitizer
+    version: 2.6.0
+    version_source: SKILL.md frontmatter in the provider repo (saved verbatim at skills/trustboost-dev-pii-sanitizer-SKILL.md)
+    published: null
+    official: true
+  - kind: mcp-listing
+    registry: glama
+    url: https://glama.ai/mcp/servers/teodorofodocrispin-cmyk/trustboost-api
+    http_status: 200
+    version: null
+    published: null
+    note: A directory listing of the remote server at https://api.trustboost.dev/mcp, not a package.
+  - kind: hosted-demo
+    registry: huggingface-spaces
+    url: https://huggingface.co/spaces/TrustBoost/pii-sanitizer
+    http_status: 200
+    version: null
+    published: null
+note: >-
+  TrustBoost publishes no client library, CLI or SDK in any registry searched, and its own SKILL.md says "No
+  SDK required — single POST request". The documented ways in are raw HTTP (OpenAPI), the remote MCP server
+  and the agent card. No SDKs pointer is emitted.
