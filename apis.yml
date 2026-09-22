@@ -33,7 +33,7 @@ tags:
 - A2A
 - MCP
 - x402
-- Agent Commerce
+- Agentic Commerce
 - Solana
 - Compliance
 - agent-native
@@ -51,6 +51,7 @@ tags_raw:
 - Solana
 - Compliance
 - Agent-native
+- Agent Commerce
 apis:
 - aid: trustboost-dev:trustboost-pii-sanitizer-api
   name: TrustBoost PII Sanitizer API
