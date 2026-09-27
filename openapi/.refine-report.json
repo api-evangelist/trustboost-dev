@@ -1,0 +1,41 @@
+{
+  "provider": "trustboost-dev",
+  "sources": [
+    "trustboost-dev-openapi.json"
+  ],
+  "outputs": [
+    "trustboost-dev-budget-api-openapi.yml",
+    "trustboost-dev-health-api-openapi.yml",
+    "trustboost-dev-mcp-api-openapi.yml",
+    "trustboost-dev-message-api-openapi.yml",
+    "trustboost-dev-sanitize-api-openapi.yml",
+    "trustboost-dev-score-api-openapi.yml",
+    "trustboost-dev-verify-api-openapi.yml"
+  ],
+  "archived": [
+    "archived openapi/trustboost-dev-openapi.json"
+  ],
+  "errors": [],
+  "warnings": [],
+  "notes": [
+    "trustboost-dev-openapi.json: upgraded openapi 3.0.0 -> OpenAPI 3.2.0",
+    "trustboost-dev-openapi.json: tagged paths POST /sanitize -> Sanitize",
+    "trustboost-dev-openapi.json: tagged paths GET /sanitize -> Sanitize",
+    "trustboost-dev-openapi.json: tagged paths POST /sanitize/preview -> Sanitize",
+    "trustboost-dev-openapi.json: tagged paths GET /score/{wallet_address} -> Score",
+    "trustboost-dev-openapi.json: tagged paths GET /verify/{anchor_tx} -> Verify",
+    "trustboost-dev-openapi.json: tagged paths GET /budget/{operator_id} -> Budget",
+    "trustboost-dev-openapi.json: tagged paths GET /health -> Health",
+    "trustboost-dev-openapi.json: tagged paths POST /mcp -> Mcp",
+    "trustboost-dev-openapi.json: tagged paths POST /message/send -> Message",
+    "trustboost-dev-openapi.json: declared missing tag: Budget",
+    "trustboost-dev-openapi.json: declared missing tag: Health",
+    "trustboost-dev-openapi.json: declared missing tag: Mcp",
+    "trustboost-dev-openapi.json: declared missing tag: Message",
+    "trustboost-dev-openapi.json: declared missing tag: Sanitize",
+    "trustboost-dev-openapi.json: declared missing tag: Score",
+    "trustboost-dev-openapi.json: declared missing tag: Verify",
+    "apis.yml register: written (+7 apis, 9 total)"
+  ],
+  "skipped": []
+}

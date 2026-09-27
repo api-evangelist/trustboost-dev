@@ -36,7 +36,7 @@ tags:
 - Agentic Commerce
 - Solana
 - Compliance
-- agent-native
+- Agent-Native
 tags_raw:
 - Privacy
 - PII redaction
@@ -52,49 +52,24 @@ tags_raw:
 - Compliance
 - Agent-native
 - Agent Commerce
+- agent-native
 apis:
-- aid: trustboost-dev:trustboost-pii-sanitizer-api
-  name: TrustBoost PII Sanitizer API
-  description: >-
-    REST contract for the sanitizer: POST /sanitize (redact PII from up to 10,000 characters with an optional
-    context mode, gated by tx_hash=TRIAL, an x402 payment header or a Solana bundle tx_hash), POST
-    /sanitize/preview (free, 3 per IP per hour, 500 characters), GET /score/{wallet_address} (TrustBoost Score
-    and NEW/ACTIVE/VERIFIED/TRUSTED tier), GET /verify/{anchor_tx} (verify a Proof of Sanitization on Solana),
-    GET /budget/{operator_id} (privacy budget), GET /health, plus the MCP and A2A ingress routes. 9
-    operations across 9 paths, published as OpenAPI 3.0.0 at https://api.trustboost.dev/openapi.json with
-    servers[] https://api.trustboost.dev. The llms.txt and pricing pages document further routes the contract
-    omits (/redact, /detect, /demo, /sanitize/quick, /preflight, /policy, /anchor).
-  humanURL: https://api.trustboost.dev/
-  baseURL: https://api.trustboost.dev
-  tags:
-  - Privacy
-  - PII Redaction
-  - x402
-  - LLM Security
-  properties:
-  - type: OpenAPI
-    url: openapi/trustboost-dev-openapi.json
-  - type: OpenAPI
-    name: TrustBoost PII Sanitizer OpenAPI (provider-hosted)
-    url: https://api.trustboost.dev/openapi.json
-  - type: Documentation
-    url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer
-  - type: APIReference
-    url: https://api.trustboost.dev/openapi.json
-  - type: Overlay
-    url: overlays/trustboost-dev-openapi-overlay.yaml
 - aid: trustboost-dev:trustboost-mcp-server
   name: TrustBoost MCP Server
   description: >-
     Remote Model Context Protocol server at https://api.trustboost.dev/mcp (HTTP JSON-RPC 2.0, protocol
-    version 2024-11-05, serverInfo trustboost 2.6.0). initialize and tools/list answer anonymously with one
-    tool, sanitize_pii, whose schema is published under the non-standard key input_schema rather than the MCP
-    inputSchema; resources/list and prompts/list return -32601. Paid use is gated by x402 (HTTP 402) or a
-    tx_hash, not by authentication. A server card is served at /.well-known/mcp-server-card.json (with
-    /.well-known/mcp.json 301ing to it), and the server is listed on Glama.
+    version 2024-11-05, serverInfo trustboost 2.6.0). initialize and tools/list answer anonymously with
+    one tool, sanitize_pii, whose schema is published under the non-standard key input_schema rather than
+    the MCP inputSchema; resources/list and prompts/list return -32601. Paid use is gated by x402 (HTTP
+    402) or a tx_hash, not by authentication. A server card is served at /.well-known/mcp-server-card.json
+    (with /.well-known/mcp.json 301ing to it), and the server is listed on Glama.
   humanURL: https://api.trustboost.dev/
   baseURL: https://api.trustboost.dev/mcp
   tags:
+  - MCP
+  - Agent-Native
+  - Privacy
+  tags_raw:
   - MCP
   - agent-native
   - Privacy
@@ -111,14 +86,18 @@ apis:
   description: >-
     Agent2Agent surface: an agent card served from https://api.trustboost.dev/.well-known/agent-card.json
     (version 2.6.0, no protocolVersion, capabilities object of product flags, three skills — sanitize_pii,
-    verify_proof, trustboost_score) and a POST /message/send route the provider calls its A2A endpoint. The
-    route is a plain FastAPI handler that requires a top-level "message" body field and rejects a JSON-RPC 2.0
-    envelope with 422, so the transport is not A2A JSONRPC; the card is graded flavored in
+    verify_proof, trustboost_score) and a POST /message/send route the provider calls its A2A endpoint.
+    The route is a plain FastAPI handler that requires a top-level "message" body field and rejects a
+    JSON-RPC 2.0 envelope with 422, so the transport is not A2A JSONRPC; the card is graded flavored in
     a2a/trustboost-dev-a2a.yml. An ANP agent-description document (did:web:api.trustboost.dev) is served
     alongside it.
   humanURL: https://api.trustboost.dev/
   baseURL: https://api.trustboost.dev/message/send
   tags:
+  - A2A
+  - Agent-Native
+  - x402
+  tags_raw:
   - A2A
   - agent-native
   - x402
@@ -128,12 +107,112 @@ apis:
   - type: AgentCard
     name: A2A Agent Card (provider-hosted)
     url: https://api.trustboost.dev/.well-known/agent-card.json
+- aid: trustboost-dev:trustboost-dev-budget-api
+  name: TrustBoost PII Sanitizer Budget API
+  description: The Budget API from TrustBoost PII Sanitizer — 1 operation(s) for budget.
+  humanURL: https://api.trustboost.dev/
+  baseURL: https://api.trustboost.dev/mcp
+  tags:
+  - Budget
+  properties:
+  - type: OpenAPI
+    url: openapi/trustboost-dev-budget-api-openapi.yml
+  - type: Documentation
+    url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer
+  - type: APIReference
+    url: https://api.trustboost.dev/openapi.json
+- aid: trustboost-dev:trustboost-dev-health-api
+  name: TrustBoost PII Sanitizer Health API
+  description: The Health API from TrustBoost PII Sanitizer — 1 operation(s) for health.
+  humanURL: https://api.trustboost.dev/
+  baseURL: https://api.trustboost.dev/mcp
+  tags:
+  - Health
+  properties:
+  - type: OpenAPI
+    url: openapi/trustboost-dev-health-api-openapi.yml
+  - type: Documentation
+    url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer
+  - type: APIReference
+    url: https://api.trustboost.dev/openapi.json
+- aid: trustboost-dev:trustboost-dev-mcp-api
+  name: TrustBoost PII Sanitizer MCP API
+  description: The Mcp API from TrustBoost PII Sanitizer — 1 operation(s) for mcp.
+  humanURL: https://api.trustboost.dev/
+  baseURL: https://api.trustboost.dev/mcp
+  tags:
+  - Mcp
+  properties:
+  - type: OpenAPI
+    url: openapi/trustboost-dev-mcp-api-openapi.yml
+  - type: Documentation
+    url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer
+  - type: APIReference
+    url: https://api.trustboost.dev/openapi.json
+- aid: trustboost-dev:trustboost-dev-message-api
+  name: TrustBoost PII Sanitizer Message API
+  description: The Message API from TrustBoost PII Sanitizer — 1 operation(s) for message.
+  humanURL: https://api.trustboost.dev/
+  baseURL: https://api.trustboost.dev/mcp
+  tags:
+  - Message
+  properties:
+  - type: OpenAPI
+    url: openapi/trustboost-dev-message-api-openapi.yml
+  - type: Documentation
+    url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer
+  - type: APIReference
+    url: https://api.trustboost.dev/openapi.json
+- aid: trustboost-dev:trustboost-dev-sanitize-api
+  name: TrustBoost PII Sanitizer Sanitize API
+  description: The Sanitize API from TrustBoost PII Sanitizer — 2 operation(s) for sanitize.
+  humanURL: https://api.trustboost.dev/
+  baseURL: https://api.trustboost.dev/mcp
+  tags:
+  - Sanitize
+  properties:
+  - type: OpenAPI
+    url: openapi/trustboost-dev-sanitize-api-openapi.yml
+  - type: Documentation
+    url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer
+  - type: APIReference
+    url: https://api.trustboost.dev/openapi.json
+- aid: trustboost-dev:trustboost-dev-score-api
+  name: TrustBoost PII Sanitizer Score API
+  description: The Score API from TrustBoost PII Sanitizer — 1 operation(s) for score.
+  humanURL: https://api.trustboost.dev/
+  baseURL: https://api.trustboost.dev/mcp
+  tags:
+  - Score
+  properties:
+  - type: OpenAPI
+    url: openapi/trustboost-dev-score-api-openapi.yml
+  - type: Documentation
+    url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer
+  - type: APIReference
+    url: https://api.trustboost.dev/openapi.json
+- aid: trustboost-dev:trustboost-dev-verify-api
+  name: TrustBoost PII Sanitizer Verify API
+  description: The Verify API from TrustBoost PII Sanitizer — 1 operation(s) for verify.
+  humanURL: https://api.trustboost.dev/
+  baseURL: https://api.trustboost.dev/mcp
+  tags:
+  - Verify
+  properties:
+  - type: OpenAPI
+    url: openapi/trustboost-dev-verify-api-openapi.yml
+  - type: Documentation
+    url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer
+  - type: APIReference
+    url: https://api.trustboost.dev/openapi.json
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: Overlay
+  url: overlays/trustboost-dev-openapi-overlay.yaml
 - type: DomainSecurity
   url: security/trustboost-dev-domain-security.yml
 - type: Website

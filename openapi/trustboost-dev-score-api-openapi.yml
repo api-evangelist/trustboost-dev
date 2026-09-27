@@ -1,0 +1,31 @@
+openapi: 3.2.0
+info:
+  title: TrustBoost PII Sanitizer Score API
+  version: 2.6.0
+  description: Privacy firewall for autonomous AI agent pipelines. Sanitizes PII before text reaches LLMs. Every paid sanitization anchored on Solana.
+  contact:
+    email: teodorofodocrispin@gmail.com
+  license:
+    name: MIT
+    url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/LICENSE
+servers:
+- url: https://api.trustboost.dev
+  description: Production
+tags:
+- name: Score
+paths:
+  /score/{wallet_address}:
+    get:
+      summary: TrustBoost Score — M2M trust verification
+      operationId: get_trustboost_score
+      parameters:
+      - name: wallet_address
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Trust score and tier
+      tags:
+      - Score

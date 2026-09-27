@@ -1,0 +1,31 @@
+openapi: 3.2.0
+info:
+  title: TrustBoost PII Sanitizer Budget API
+  version: 2.6.0
+  description: Privacy firewall for autonomous AI agent pipelines. Sanitizes PII before text reaches LLMs. Every paid sanitization anchored on Solana.
+  contact:
+    email: teodorofodocrispin@gmail.com
+  license:
+    name: MIT
+    url: https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/LICENSE
+servers:
+- url: https://api.trustboost.dev
+  description: Production
+tags:
+- name: Budget
+paths:
+  /budget/{operator_id}:
+    get:
+      summary: Privacy Budget status
+      operationId: get_budget_status
+      parameters:
+      - name: operator_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Budget status
+      tags:
+      - Budget
