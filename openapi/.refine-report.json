@@ -1,7 +1,7 @@
 {
   "provider": "trustboost-dev",
   "sources": [
-    "trustboost-dev-openapi.json"
+    "_original/trustboost-dev-openapi.json"
   ],
   "outputs": [
     "trustboost-dev-budget-api-openapi.yml",
@@ -12,12 +12,11 @@
     "trustboost-dev-score-api-openapi.yml",
     "trustboost-dev-verify-api-openapi.yml"
   ],
-  "archived": [
-    "archived openapi/trustboost-dev-openapi.json"
-  ],
+  "archived": [],
   "errors": [],
   "warnings": [],
   "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
     "trustboost-dev-openapi.json: upgraded openapi 3.0.0 -> OpenAPI 3.2.0",
     "trustboost-dev-openapi.json: tagged paths POST /sanitize -> Sanitize",
     "trustboost-dev-openapi.json: tagged paths GET /sanitize -> Sanitize",
@@ -35,7 +34,15 @@
     "trustboost-dev-openapi.json: declared missing tag: Sanitize",
     "trustboost-dev-openapi.json: declared missing tag: Score",
     "trustboost-dev-openapi.json: declared missing tag: Verify",
-    "apis.yml register: written (+7 apis, 9 total)"
+    "apis.yml register: already-registered"
   ],
-  "skipped": []
+  "skipped": [
+    "trustboost-dev-budget-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "trustboost-dev-health-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "trustboost-dev-mcp-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "trustboost-dev-message-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "trustboost-dev-sanitize-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "trustboost-dev-score-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "trustboost-dev-verify-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }
