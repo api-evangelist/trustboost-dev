@@ -113,6 +113,8 @@ apis:
   humanURL: https://api.trustboost.dev/
   baseURL: https://api.trustboost.dev/mcp
   tags:
+  - Budgets
+  tags_raw:
   - Budget
   properties:
   - type: OpenAPI
@@ -141,6 +143,8 @@ apis:
   humanURL: https://api.trustboost.dev/
   baseURL: https://api.trustboost.dev/mcp
   tags:
+  - MCP
+  tags_raw:
   - Mcp
   properties:
   - type: OpenAPI
@@ -211,6 +215,9 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: CapabilityMap
+  url: capabilities/trustboost-dev-capability-edges.yml
+  name: TrustBoost PII Sanitizer Business Capability Map
 - type: Overlay
   url: overlays/trustboost-dev-openapi-overlay.yaml
 - type: DomainSecurity
