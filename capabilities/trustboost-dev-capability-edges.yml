@@ -1,0 +1,26 @@
+slug: trustboost-dev
+provider: TrustBoost PII Sanitizer
+generated_by: planning/capability-mapping/scripts/classify_capabilities.py
+model: claude-opus-5
+frame:
+- Software & Technology
+min_confidence: 0.7
+capability_model:
+  source: https://github.com/vincentmakes/turbo-ea-capabilities
+  license: CC-BY-4.0
+  attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+    CC BY 4.0
+  notice: NOTICE
+edge_count: 1
+edges:
+- tag: Sanitize
+  spec_file: trustboost-dev-sanitize-api-openapi.yml
+  capability_id: BC-130.50
+  capability_id_l1: BC-130
+  capability_name: Privacy & Data Protection Management
+  confidence: 0.7
+  evidence: POST /sanitize "Sanitize PII from text"; "Privacy firewall for autonomous AI agent pipelines.
+    Sanitizes PII before text reaches LLMs"
+  reason: The operations detect and redact personally identifiable information (emails, phone numbers,
+    national IDs) before data leaves to an LLM — an operational privacy-by-design / data-protection control,
+    hence Privacy & Data Protection Management rather than an AI or security-operations capability.
