@@ -1,0 +1,12 @@
+{
+ "url": "https://api.trustboost.dev/openapi.json",
+ "requested_url": "https://api.trustboost.dev/openapi.json",
+ "status": 200,
+ "content_type": "application/json",
+ "bytes": 3874,
+ "sha256": "c4813798943a5a4a31a6fe71c9be81abc833918ee6a242da3a6527414cd243d1",
+ "fetched_at": "2026-10-04",
+ "fetched_by": "APIEvangelist-Harvest/1.0 (+https://apievangelist.com)",
+ "match": "byte-identical",
+ "note": "Re-fetched from the provider by verify-openapi-sources.py; the archived file is byte-identical to what the provider serves."
+}
