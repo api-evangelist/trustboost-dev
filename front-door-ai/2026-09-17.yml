@@ -1,0 +1,33 @@
+# Front Door AI Index — trustboost-dev — 2026-09-17
+# AI vocabulary counted on the provider's root page. Generated; do not edit.
+# `score` is null unless ownership is `own` — see front_door_ai.py.
+front_door_ai:
+  slug: trustboost-dev
+  lexicon_version: '1.0'
+  probed_at: '2026-09-25'
+  host: api.trustboost.dev
+  final_host: api.trustboost.dev
+  ownership: own
+  owner: trustboost-dev
+  shares_host_with: null
+  inherited_from: null
+  alias_of: null
+  verdict: scored
+  score: 13
+  band: 5
+  band_label: prominent
+  host_score: 13
+  density: 60.19
+  words: 216
+  tiers:
+    agentic: 5
+    core: 8
+    model: 0
+  ambiguous: 4
+  top_terms:
+    AI: 6
+    agent: 4
+    AI agent: 3
+    LLMs: 2
+    MCP: 1
+    llms.txt: 1
