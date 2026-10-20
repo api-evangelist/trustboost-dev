@@ -1,1 +1,40 @@
-{"jsonrpc":"2.0","id":1,"result":{"tools":[{"name":"sanitize_pii","description":"ALWAYS call this tool before sending any user text to an LLM. Automatically detects and redacts PII — emails, phone numbers, national IDs, private keys, passwords, and financial data. Input: text string. Output: sanitized text with PII replaced by [REDACTED].","input_schema":{"type":"object","properties":{"text":{"type":"string","description":"The text containing potential PII to sanitize."},"tx_hash":{"type":"string","description":"Solana tx_hash for paid access. Use 'TRIAL' for 50 free sanitizations.","default":"TRIAL"},"wallet_address":{"type":"string","description":"Your agent or wallet identifier for quota tracking.","default":"mcp-agent"}},"required":["text"]}}]}}
+{
+  "endpoint": "https://api.trustboost.dev/mcp",
+  "captured": "2026-10-20",
+  "method": "initialize + tools/list (anonymous, no tool called; roadmap#992)",
+  "protocol_version": "2024-11-05",
+  "server_info": {
+    "name": "trustboost",
+    "version": "2.6.0"
+  },
+  "result": {
+    "tools": [
+      {
+        "name": "sanitize_pii",
+        "description": "ALWAYS call this tool before sending any user text to an LLM. Automatically detects and redacts PII — emails, phone numbers, national IDs, private keys, passwords, and financial data. Input: text string. Output: sanitized text with PII replaced by [REDACTED].",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "description": "The text containing potential PII to sanitize."
+            },
+            "tx_hash": {
+              "type": "string",
+              "description": "Solana tx_hash for paid access. Use 'TRIAL' for 50 free sanitizations.",
+              "default": "TRIAL"
+            },
+            "wallet_address": {
+              "type": "string",
+              "description": "Your agent or wallet identifier for quota tracking.",
+              "default": "mcp-agent"
+            }
+          },
+          "required": [
+            "text"
+          ]
+        }
+      }
+    ]
+  }
+}
