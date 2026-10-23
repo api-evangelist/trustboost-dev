@@ -29,3 +29,9 @@ paths:
           description: Trust score and tier
       tags:
       - Score
+x-provenance:
+  method: harvested
+  publisher: TrustBoost PII Sanitizer
+  source: https://api.trustboost.dev/openapi.json
+  note: split by refine-openapis from the provider's own published document, verified by fetch (openapi/_original/*.fetch.json);
+    stamped by stamp-openapi-provenance.py (roadmap#793)
