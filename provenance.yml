@@ -12,6 +12,9 @@ artifacts:
   authentication/trustboost-dev-authentication.yml:
     method: searched
     evidence: declared in the artifact
+  capabilities/trustboost-dev-capability-edges.yml:
+    method: unknown
+    evidence: no authorship recorded
   conformance/trustboost-dev-conformance.yml:
     method: searched
     evidence: declared in the artifact
@@ -27,7 +30,13 @@ artifacts:
   front-door-ai/2026-09-17.yml:
     method: unknown
     evidence: no authorship recorded
-  kin/checks-2026-09-24T161608.yml:
+  integrations/_index.yml:
+    method: generated
+    evidence: carries an API Evangelist house phrase
+  integrations/trustboost-dev-integration-edges.yml:
+    method: unknown
+    evidence: no authorship recorded
+  kin/checks-2026-10-11T110117.yml:
     method: generated
     evidence: Kin Score snapshot written by score.rb
   kin/score-2026-09-19T193153.yml:
@@ -60,6 +69,21 @@ artifacts:
   kin/score-2026-09-24T161608.yml:
     method: generated
     evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-25T210408.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-25T232841.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-10-03T000835.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-10-03T024842.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-10-11T110117.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
   lifecycle/trustboost-dev-lifecycle.yml:
     method: searched
     evidence: declared in the artifact
@@ -75,12 +99,34 @@ artifacts:
   mcp/trustboost-dev-tool-crosswalk.yml:
     method: derived
     evidence: declared in the artifact
-  openapi/trustboost-dev-openapi.json:
-    method: unknown
-    evidence: no authorship recorded
+  openapi/_original/trustboost-dev-openapi.json:
+    method: harvested
+    evidence: byte-identical to https://api.trustboost.dev/openapi.json (sha256 c4813798943a, fetched
+      2026-10-04)
+  openapi/trustboost-dev-budget-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/trustboost-dev-health-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/trustboost-dev-mcp-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/trustboost-dev-message-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/trustboost-dev-sanitize-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/trustboost-dev-score-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/trustboost-dev-verify-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
   overlays/trustboost-dev-openapi-overlay.yaml:
-    method: generated
-    evidence: declared in the artifact
+    method: derived
+    evidence: an API Evangelist overlay (title) over the provider's contract
   packages/trustboost-dev-packages.yml:
     method: searched
     evidence: declared in the artifact
