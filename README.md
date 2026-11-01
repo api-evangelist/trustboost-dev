@@ -64,5 +64,126 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-TrustBoost PII Sanitizer is a company surfaced via the API Evangelist harvest backlog (source: a2a-registry) and added to the network as a stub for full-pipeline profiling.
-- https://trustboost.dev/
+TrustBoost PII Sanitizer is a pay-per-call "privacy firewall" for autonomous AI agent pipelines, built and operated by an individual developer (Teodoro Crispin, GitHub teodorofodocrispin-cmyk) and served entirely from https://api.trustboost.dev — the apex trustboost.dev has no DNS record. An agent POSTs text to /sanitize and gets it back with emails, phone numbers, national IDs (RFC, CUIT, CPF, CNPJ, Personalausweis, マイナンバー, NIR, Codice Fiscale, RRN and more across 8 languages), API keys and financial data replaced by [REDACTED], plus a safety_score, a risk_category and an entity list; five context modes (general, legal, financial, medical, code) tune the redaction. There is no account and no API key: 50 free calls per wallet with tx_hash=TRIAL, a free 3-per-hour preview, then x402 payment in USDC on Base or Solana ($0.01 per call or a 149 USDC prepaid bundle of 10,000), with every paid sanitization anchored on Solana as a verifiable "Proof of Sanitization". The same service is exposed three ways from one host: a 9-operation OpenAPI 3.0.0 REST contract, a remote MCP server at /mcp (one tool, sanitize_pii), and an A2A-flavored agent card at /.well-known/agent-card.json with three skills. The provider's own privacy policy describes it as a learning prototype that sends raw text to OpenAI GPT-4o-mini for detection and has no certified security audit.
+
+**Areas:** Privacy · PII Redaction · Data Protection · LLM Security · AI Safety · Agents · A2A · MCP · x402 · Agentic Commerce · Solana · Compliance
+
+## TrustBoost PII Sanitizer on APIs.io
+
+Everything profiled for TrustBoost PII Sanitizer is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/trustboost-dev/](https://apis.io/providers/trustboost-dev/)** — or go straight to one of the APIs or properties below.
+
+### APIs (9)
+
+- [TrustBoost MCP Server](https://apis.io/apis/trustboost-dev/trustboost-mcp-server/) — Remote Model Context Protocol server at https://api.trustboost.dev/mcp (HTTP JSON-RPC 2.0, protocol version 2024-11-05, serverInfo trustboost 2.6.0).…
+- [TrustBoost A2A Agent](https://apis.io/apis/trustboost-dev/trustboost-a2a-agent/) — Agent2Agent surface: an agent card served from https://api.trustboost.dev/.well-known/agent-card.json (version 2.6.0, no protocolVersion, capabilities…
+- [TrustBoost PII Sanitizer Budget API](https://apis.io/apis/trustboost-dev/trustboost-dev-budget-api/) — The Budget API from TrustBoost PII Sanitizer — 1 operation(s) for budget.
+- [TrustBoost PII Sanitizer Health API](https://apis.io/apis/trustboost-dev/trustboost-dev-health-api/) — The Health API from TrustBoost PII Sanitizer — 1 operation(s) for health.
+- [TrustBoost PII Sanitizer MCP API](https://apis.io/apis/trustboost-dev/trustboost-dev-mcp-api/) — The Mcp API from TrustBoost PII Sanitizer — 1 operation(s) for mcp.
+- [TrustBoost PII Sanitizer Message API](https://apis.io/apis/trustboost-dev/trustboost-dev-message-api/) — The Message API from TrustBoost PII Sanitizer — 1 operation(s) for message.
+- [TrustBoost PII Sanitizer Sanitize API](https://apis.io/apis/trustboost-dev/trustboost-dev-sanitize-api/) — The Sanitize API from TrustBoost PII Sanitizer — 2 operation(s) for sanitize.
+- [TrustBoost PII Sanitizer Score API](https://apis.io/apis/trustboost-dev/trustboost-dev-score-api/) — The Score API from TrustBoost PII Sanitizer — 1 operation(s) for score.
+- [TrustBoost PII Sanitizer Verify API](https://apis.io/apis/trustboost-dev/trustboost-dev-verify-api/) — The Verify API from TrustBoost PII Sanitizer — 1 operation(s) for verify.
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [trustboost-dev-mcp.yml](https://apis.io/servers/trustboost-dev/trustboost-dev-mcp-yml/)
+
+#### Overlays (1)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Trustboost Dev Openapi Overlay](https://apis.io/overlays/trustboost-dev/trustboost-dev-openapi-overlay/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Trustboost Dev Authentication](https://apis.io/security/trustboost-dev/trustboost-dev-authentication/)
+- [Trustboost Dev Domain Security](https://apis.io/security/trustboost-dev/trustboost-dev-domain-security/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Trustboost Dev Plans Pricing](https://apis.io/plans/trustboost-dev/trustboost-dev-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Trustboost Dev Rate Limits](https://apis.io/rate-limits/trustboost-dev/trustboost-dev-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://api.trustboost.dev/)
+- [Documentation](https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer)
+- [Getting started](https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/AGENTS.md)
+- [API reference](https://api.trustboost.dev/openapi.json)
+- [Pricing](https://api.trustboost.dev/pricing.md)
+- [Support](https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/issues)
+- [Terms of service](https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/PRIVACY.md)
+- [Privacy policy](https://github.com/teodorofodocrispin-cmyk/TrustBoost-PII-Sanitizer/blob/main/PRIVACY.md)
+- [GitHub](https://github.com/teodorofodocrispin-cmyk)
+
+## API Evangelist rating
+
+**Kin Score 50.2** — developing · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 75.0 |
+| Contract quality | 41.7 |
+| Contract governance | 18.2 |
+| Operational transparency | 23.7 |
+| Developer ergonomics | 59.5 |
+| Access clarity | 63.2 |
+
+**Agent readiness 31.2** — agent-ready
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | — |
+| Reversibility Documented | — |
+| MCP Server | documented (partial credit) |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | — |
+| Error Semantics | derived (partial credit) |
+| OpenAPI Examples | partial |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | — |
+| Agent Skills | yes |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | flavored (partial credit) |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | na |
+| Operation Distinctiveness | distinct |
+
+**Regulatory alignment 36.3** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/trustboost-dev/](https://apis.io/providers/trustboost-dev/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for TrustBoost PII Sanitizer: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/trustboost-dev/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
